@@ -1,0 +1,38 @@
+# Qt/qmake 빌드 산출물
+*.o
+moc_*.cpp
+moc_*.o
+qrc_*.cpp
+qrc_*.o
+ui_*.h
+Makefile
+*.pro.user
+*.pro.user.*
+
+# 일반 빌드 디렉터리
+.build/
+build/
+bin/
+obj/
+out/
+# Qt/qmake 빌드 산출물
+*.o
+moc_*.cpp
+moc_*.o
+qrc_*.cpp
+qrc_*.o
+ui_*.h
+*.pro.user
+*.pro.user.*
+Makefile
+.build/
+bin/
+.obj/
+
+# 분석/실행 산출물
+__pycache__/
+*.pyc
+latency_metrics_*.csv
+analysis_output/
+latency_trend.png
+latency_distribution.png
