@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "rpmparser.h"
 
 #include <QSerialPortInfo>
 #include <QDebug>
@@ -86,24 +87,11 @@ void MainWindow::setDisplayRpm(int rpm) noexcept
 
 void MainWindow::readSerialData()
 {
-    m_serialBuffer.append(m_serialPort->readAll());
-
-    if (m_serialBuffer.size() > kMaxBufferBytes)
-        m_serialBuffer.remove(0, m_serialBuffer.size() - kMaxBufferBytes);
-
-    int nl;
-    while ((nl = m_serialBuffer.indexOf('\n')) != -1) {
-        QByteArray line = m_serialBuffer.left(nl);
-        m_serialBuffer.remove(0, nl + 1);
-
-        if (line.size() > kMaxLineLen) continue;
-
-        bool ok = false;
-        const int rawRpm = QString::fromLatin1(line.trimmed()).toInt(&ok);
-        if (!ok) continue;
-
+    // Line parsing lives in rpmparser.h (unit-tested); behaviour unchanged.
+    const QVector<int> samples =
+        RpmParser::consume(m_serialBuffer, m_serialPort->readAll(), kMaxLineLen, kMaxBufferBytes);
+    for (const int rawRpm : samples)
         acceptRpmSample(rawRpm, "serial");
-    }
 }
 
 void MainWindow::flushPendingRpm()
@@ -166,8 +154,7 @@ void MainWindow::update_values()
 
 int MainWindow::correctRpmValue(int rawRpm)
 {
-    if (rawRpm < 0) rawRpm = 0;
-    return rawRpm;
+    return RpmParser::correct(rawRpm);
 }
 
 void MainWindow::logEvent(int seq, qint64 t_serial, qint64 t_paint, int rawRpm, int rpm)
