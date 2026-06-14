@@ -1,0 +1,17 @@
+# README "권장 커밋 제외 파일"
+*.o
+Makefile
+moc_*.cpp
+moc_*.o
+qrc_*.cpp
+qrc_*.o
+ui_*.h
+.qmake.stash
+*.pro.user
+/digital_cluster
+/latency_metrics_*.csv
+/analysis_output/
+
+# 테스트
+__pycache__/
+.pytest_cache/

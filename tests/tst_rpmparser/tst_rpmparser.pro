@@ -1,0 +1,9 @@
+QT       += core testlib
+QT       -= gui
+CONFIG   += console c++17 testcase
+CONFIG   -= app_bundle
+TARGET    = tst_rpmparser
+TEMPLATE  = app
+INCLUDEPATH += ../..
+HEADERS  += ../../rpmparser.h
+SOURCES  += tst_rpmparser.cpp
