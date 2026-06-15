@@ -9,6 +9,7 @@
 #include <QTextStream>
 #include <QElapsedTimer>
 #include <QString>
+#include <QVector>
 
 #include "timestamplabel.h"
 
@@ -33,6 +34,7 @@ private slots:
     void readSerialData();    // 시리얼 수신 → 버퍼링
     void flushPendingRpm();   // 30Hz 주기 UI 반영
     void generateSimulatedRpm();
+    void feedReplaySample();  // CLUSTER_REPLAY_FILE 입력 (검증용)
 
 private:
     int correctRpmValue(int rawRpm);
@@ -40,6 +42,7 @@ private:
     void acceptRpmSample(int rawRpm, const QString &source);
     void setupSerialPort();
     void setupSimulation();
+    bool setupReplay(const QString &path);
 
 private:
     Ui::MainWindow *ui{nullptr};
@@ -59,6 +62,9 @@ private:
     // UI 쓰로틀
     QTimer m_uiThrottle;
     QTimer m_simTimer;
+    QTimer m_replayTimer;
+    QVector<int> m_replaySamples;
+    int m_replayIndex{0};
     int m_pendingRpm{-1};
     int m_pendingRawRpm{-1};
     int m_pendingSeq{-1};

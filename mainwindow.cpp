@@ -45,7 +45,10 @@ MainWindow::MainWindow(QWidget *parent)
     m_uiThrottle.start();
 
     const QByteArray simulate = qgetenv("CLUSTER_SIMULATE");
-    if (simulate == "1" || simulate.toLower() == "true")
+    const QByteArray replayFile = qgetenv("CLUSTER_REPLAY_FILE");  // validation: recorded RPM sequence
+    if (!replayFile.isEmpty())
+        setupReplay(QString::fromLocal8Bit(replayFile));
+    else if (simulate == "1" || simulate.toLower() == "true")
         setupSimulation();
     else
         setupSerialPort();
@@ -239,3 +242,41 @@ void MainWindow::generateSimulatedRpm()
     acceptRpmSample(wave + noise, "simulation");
 }
 
+
+// Validation input: replays a file of RPM values (same line protocol as the serial port)
+// at a fixed interval, so performance runs are repeatable without Arduino/sensor hardware.
+//   CLUSTER_REPLAY_FILE=<path>  CLUSTER_REPLAY_INTERVAL_MS=<ms, default 20>
+// The sequence is played once; samples go through the same acceptRpmSample() path.
+bool MainWindow::setupReplay(const QString &path)
+{
+    QFile f(path);
+    if (!f.open(QIODevice::ReadOnly)) {
+        qWarning() << "Cannot open CLUSTER_REPLAY_FILE:" << path;
+        if (ui->rpmLabel) ui->rpmLabel->setText("Replay Err");
+        return false;
+    }
+    QByteArray buffer;
+    const QByteArray data = f.readAll() + "\n";
+    m_replaySamples = RpmParser::consume(buffer, data, kMaxLineLen, data.size());
+    m_replayIndex = 0;
+    m_lastSource = "replay";
+
+    const int interval = QString::fromLocal8Bit(qgetenv("CLUSTER_REPLAY_INTERVAL_MS")).toInt();
+    m_replayTimer.setInterval(interval > 0 ? interval : 20);
+    m_replayTimer.setTimerType(Qt::PreciseTimer);
+    connect(&m_replayTimer, &QTimer::timeout, this, &MainWindow::feedReplaySample);
+    m_replayTimer.start();
+    qDebug() << "Replaying" << m_replaySamples.size() << "RPM samples from" << path
+             << "every" << m_replayTimer.interval() << "ms";
+    return true;
+}
+
+void MainWindow::feedReplaySample()
+{
+    if (m_replayIndex >= m_replaySamples.size()) {
+        m_replayTimer.stop();
+        qDebug() << "Replay finished";
+        return;
+    }
+    acceptRpmSample(m_replaySamples.at(m_replayIndex++), "replay");
+}
