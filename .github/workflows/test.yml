@@ -1,0 +1,31 @@
+name: tests
+
+# Hardware-free checks: app compile + QtTest parser tests (in the same Ubuntu 20.04 / Qt 5
+# toolchain as the existing Dockerfile) and the Python latency-analysis tests.
+# Performance scenarios (scripts/run_perf_scenarios.sh) are NOT run in CI: timing on shared
+# runners is not a stable reference.
+on:
+  push:
+  pull_request:
+
+jobs:
+  qt:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build app + QtTest in Docker (Ubuntu 20.04, Qt 5)
+        run: docker build -f Dockerfile.test -t rubik-cluster-test .
+      - name: Run QtTest (parser)
+        run: docker run --rm rubik-cluster-test
+
+  analysis:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"  # only version verified locally
+      - run: python -m pip install pytest
+      - run: python -m pytest -v
