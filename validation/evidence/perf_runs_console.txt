@@ -1,0 +1,18 @@
+### run 1
+== simulation_50hz: samples_logged: 965 samples_not_logged: 633 p95_ms: 20.000 max_ms: 21.000 budget_exceed_count: 0 verdict: PASS 
+== fixed_2500_20ms: samples_logged: 1 samples_not_logged: 0 p95_ms: 12.000 max_ms: 12.000 budget_exceed_count: 0 verdict: PASS 
+== rapid_0_8000_20ms: samples_logged: 319 samples_not_logged: 1178 p95_ms: 21.000 max_ms: 30.000 budget_exceed_count: 0 verdict: PASS 
+== ramp_33ms: samples_logged: 900 samples_not_logged: 0 p95_ms: 34.000 max_ms: 35.000 budget_exceed_count: 440 verdict: FAIL 
+== burst_1ms: samples_logged: 968 samples_not_logged: 28825 p95_ms: 2.000 max_ms: 3.000 budget_exceed_count: 0 verdict: PASS 
+### run 2
+== simulation_50hz: samples_logged: 962 samples_not_logged: 636 p95_ms: 20.000 max_ms: 21.000 budget_exceed_count: 0 verdict: PASS 
+== fixed_2500_20ms: samples_logged: 1 samples_not_logged: 0 p95_ms: 14.000 max_ms: 14.000 budget_exceed_count: 0 verdict: PASS 
+== rapid_0_8000_20ms: samples_logged: 319 samples_not_logged: 1178 p95_ms: 21.000 max_ms: 31.000 budget_exceed_count: 0 verdict: PASS 
+== ramp_33ms: samples_logged: 900 samples_not_logged: 0 p95_ms: 34.000 max_ms: 36.000 budget_exceed_count: 452 verdict: FAIL 
+== burst_1ms: samples_logged: 968 samples_not_logged: 28809 p95_ms: 2.000 max_ms: 4.000 budget_exceed_count: 0 verdict: PASS 
+### run 3
+== simulation_50hz: samples_logged: 968 samples_not_logged: 630 p95_ms: 20.000 max_ms: 22.000 budget_exceed_count: 0 verdict: PASS 
+== fixed_2500_20ms: samples_logged: 1 samples_not_logged: 0 p95_ms: 14.000 max_ms: 14.000 budget_exceed_count: 0 verdict: PASS 
+== rapid_0_8000_20ms: samples_logged: 319 samples_not_logged: 1178 p95_ms: 21.000 max_ms: 30.000 budget_exceed_count: 0 verdict: PASS 
+== ramp_33ms: samples_logged: 900 samples_not_logged: 0 p95_ms: 34.000 max_ms: 35.000 budget_exceed_count: 444 verdict: FAIL 
+== burst_1ms: samples_logged: 968 samples_not_logged: 28862 p95_ms: 2.000 max_ms: 3.000 budget_exceed_count: 0 verdict: PASS 

@@ -1,0 +1,20 @@
+{
+  "samples_logged": 900,
+  "seq_first": 1,
+  "seq_last": 900,
+  "samples_accepted_in_range": 900,
+  "samples_not_logged": 0,
+  "mean_ms": 33.465555555555554,
+  "median_ms": 34.0,
+  "p95_ms": 34.0,
+  "p99_ms": 34.0,
+  "min_ms": 31.0,
+  "max_ms": 36.0,
+  "jitter_stddev_ms": 0.5830306092805289,
+  "budget_ms": 33.3,
+  "budget_exceed_count": 452,
+  "budget_exceed_ratio": 0.5022222222222222,
+  "criterion": "p95 <= 33.3 ms",
+  "criterion_value_ms": 34.0,
+  "verdict": "FAIL"
+}

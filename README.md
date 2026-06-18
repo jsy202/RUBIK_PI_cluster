@@ -389,3 +389,61 @@ libGL error: failed to load driver
 - `analysis_output/`
 
 `.dockerignore`에는 Docker 빌드 컨텍스트에서 불필요한 산출물이 제외되도록 설정되어 있습니다.
+
+---
+
+## Post-project Performance Validation
+
+> 이 섹션은 **연구 종료 후(2026-10)** 수행한 검증이다. 위의 내용(구현, 측정 정의, 실행 방법)은 연구 당시 내용이며 수정하지 않았다.
+> 연구 당시의 RUBIK Pi 3 측정 수치(포스터/논문)는 이 저장소에 없다. 아래 수치는 **개발 PC의 Docker + Qt offscreen 환경에서 새로 측정한 것**이며, RUBIK Pi 결과와 같은 조건이 아니다.
+> 연구 당시 코드는 tag `research-baseline`(`4d4e3f8`)에 있다.
+
+### 목적
+
+요구 성능(30 Hz UI, 33.3 ms soft budget)을 **측정 가능한 기준**으로 정의하고, 하드웨어 없이도 반복 가능한 입력으로 PASS/FAIL을 판정한다. 그리고 그 수치가 무엇을 측정하는지 경계를 분명히 한다.
+
+### 측정 구간 (코드 기준, [measurement_boundary.md](validation/measurement_boundary.md))
+
+`t_in` = 앱이 파싱된 샘플을 받아들인 시점 → `t_frame` = rpmLabel의 `paintEvent`가 끝난 시점(backing store).
+
+- **포함:** 30 Hz throttle 대기(0~33 ms)와 Qt paint 스케줄링.
+- **포함하지 않음:** 센서/Arduino/UART 전송, 물리 화면 표시.
+- 33.3 ms는 hard real-time deadline이 아니라 **soft budget**이다.
+
+### 한 일
+
+| 항목 | 내용 |
+|---|---|
+| 파서 테스트 가능화 | `readSerialData`의 파싱 루프를 `rpmparser.h`로 그대로 옮겼다(`116b4df`). 원래 루프와의 **차등 테스트**로 동작이 같음을 확인했다 |
+| QtTest | 정상, 0, 음수 보정, int 경계, overflow, 잘못된 문자열, 빈 줄, CRLF, 분할 프레임, 다중 프레임, 반복값, 급변, 64/65바이트, 8 KiB 버퍼 초과 → **18 passed**(Docker, Qt 5.12.8). 변이 2종으로 negative control을 했고, 각각 1건씩 실패했다 |
+| Replay 입력 | `CLUSTER_REPLAY_FILE`(선택, 기본 비활성)로 같은 RPM 시퀀스를 반복 입력한다 |
+| 분석 | `validate_latency.py`: 기존 분석 스크립트를 재사용하고 jitter 정의(모집단 표준편차)를 유지한다. 중앙값, p95/p99, budget 초과 수, **로그되지 않은 샘플 수**, PASS/FAIL을 계산한다 |
+| 성능 회귀 시나리오 | 기존 시뮬레이션과 고정값, 급변, 33 ms, 1 kHz 버스트를 각 30 s × 3회 실행했다 |
+
+### Post-project Validation Result (개발 PC, Docker, offscreen)
+
+| 시나리오 | p95 (ms) | 로그되지 않은 샘플 | 판정 (p95 ≤ 33.3) |
+|---|---|---|---|
+| 기존 시뮬레이션 50 Hz | 20 | 약 40 % | PASS |
+| 고정값 2500 | (로그 1건) | 같은 값 → repaint 없음 | PASS (표본 없음) |
+| 급변 0/8000 @20 ms | 21 | 약 79 % (aliasing) | PASS |
+| 입력 주기 = UI 주기 33 ms | 34 | 0 % | **FAIL** (440~452/900건 초과, 위상 고정) |
+| 버스트 1 kHz | 2 | 약 97 % | PASS |
+
+3회 반복 사이의 p95 차이는 0 ms였다. 자세한 결과와 원시 CSV는 [performance_report.md](validation/performance_report.md)에 있다.
+
+이 측정에서 확인한 점:
+
+- 지연 통계는 **표시된 샘플에 대해서만** 계산된다. 입력이 30 Hz보다 빠르면 상당수 샘플이 표시되지 않는데, 지연 수치만으로는 이것이 드러나지 않는다.
+- 입력 주기가 UI 주기와 같으면 throttle 대기 때문에 33.3 ms budget을 구조적으로 넘을 수 있다.
+
+### CI
+
+`.github/workflows/test.yml`은 Docker로 앱을 빌드하고 QtTest와 pytest(분석)를 실행한다. 성능 시나리오는 제외했다. 아직 push하지 않아 **GitHub에서 실행된 기록은 없다.**
+
+### Limitations
+
+- RUBIK Pi 3, Arduino, 센서, 실제 디스플레이 없이 측정했다. offscreen 플랫폼은 합성과 vsync를 포함하지 않는다.
+- 시리얼 수신 경로의 성능은 측정하지 않았다(파서는 기능 테스트만 함).
+
+문서: [validation/](validation/) — requirements, measurement_boundary, test_cases, traceability_matrix, performance_report, limitations
