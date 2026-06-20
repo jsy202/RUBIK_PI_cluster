@@ -50,6 +50,16 @@ Sensor → Arduino → Serial → readSerialData() → acceptRpmSample() [t_in]
 
 → [performance_report.md](validation/performance_report.md)
 
+## Input-rate Sweep (Post-project, 2026-10-02)
+**환경: 개발 PC + Docker + Qt offscreen, replay 입력. 하드웨어 검증이 아니다.** 측정 구간은 `sample acceptance → paintEvent`이며, 각 조건 15 s × 3회를 실행했다.
+
+| 입력 rate (명목) | 10 | 30 | 60 | 100 | 200 | 500 | 1000 (실측 938) |
+|---|---|---|---|---|---|---|---|
+| drop ratio | 0 % | 0 % | 48.4 % | 69.7 % | 84.8 % | 93.9 % | 96.8 % |
+| p95 latency | 32 ms | **34 ms (FAIL)** | 17 ms | 10.3 ms | 5 ms | 3 ms | 2 ms |
+
+입력 rate가 UI 주기(약 30 Hz)를 넘으면 **p95는 낮아지고 drop은 커진다.** 이는 성능 개선이 아니다. 지연 통계가 표시된 샘플에 대해서만 계산되기 때문이며, **latency 단독 지표가 처리 품질을 충분히 나타내지 못할 수 있음을 확인**한 결과다. 지연 측면의 최악 조건은 입력 주기가 UI 주기와 같은 30 Hz였다(위상 고정). → [rate_sweep/analysis.md](validation/rate_sweep/analysis.md)
+
 ## Verification
 - **QtTest 16건**(Docker): 정상, 0, 음수 보정, int 경계, overflow, 잘못된 문자열, 빈 줄, CRLF, 분할 프레임, 다중 프레임, 반복값, 급변, 64/65바이트, 8 KiB 초과, 그리고 **원래 `readSerialData` 루프와의 차등 테스트**.
 - negative control: 변이 2종이 각각 1건씩 실패로 검출되었다. `.trimmed()` 제거는 등가 변이라 검출되지 않았고, 이 사실을 기록했다.
