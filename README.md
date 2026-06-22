@@ -1,95 +1,75 @@
-# RUBIK Pi 3 Qt Digital Cluster · Post-project Performance Validation
+# RUBIK Pi 3 Qt Digital Cluster — Quantitative UI Latency Verification
+
+30 Hz UI 요구를 약 33.3 ms의 측정 기준으로 구체화하고, 실제 RUBIK Pi 연구 환경에서 1,000회 반복 측정해 Qt 애플리케이션 내부의 렌더링 지연을 정량 검증한 프로젝트다.
 
 ## Project
-RUBIK Pi 3 보드에서 동작하는 C++/Qt5 디지털 클러스터다. Arduino가 시리얼(9600 baud)로 보내는 RPM을 화면에 표시하고, 지연시간을 CSV로 기록해 분석한다.
+RUBIK Pi 3 보드에서 동작하는 C++/Qt5 디지털 클러스터다. Arduino가 시리얼(9600 baud)로 보내는 RPM 값을 화면에 표시하고, 그 과정의 지연시간을 CSV로 기록해 분석한다.
 
 ## Architecture
 ```text
-Sensor → Arduino → Serial → readSerialData() → acceptRpmSample() [t_in]
-       → pending (30 Hz flush, 33 ms QTimer) → setText → TimestampLabel::paintEvent [t_frame] → CSV
+Sensor → Arduino → Serial → readSerialData() → acceptRpmSample()  [t_in]
+       → pending (30 Hz flush, 33 ms QTimer) → setText → TimestampLabel::paintEvent  [t_frame] → CSV → 분석
 ```
 
-## Original Research
-연구 당시에는 다음을 구현했다. 아래 "Original Research Documentation"은 당시 README 원문이며 수정하지 않았다.
+## Historical Research Result (original research / poster)
 
-- Qt 클러스터 GUI
-- 30 Hz UI throttle
-- `paintEvent` 기반 지연 로깅
-- Python/MATLAB 분석
+> **출처: original research poster result.** RUBIK Pi 3 연구 환경에서 측정한 값이다. 원본 측정 CSV는 이 저장소에 포함되어 있지 않다.
+> 아래의 Post-project Validation(PC/Docker)과는 별개이며, 그 결과와 섞거나 같은 조건으로 비교하지 않는다.
 
-포스터/논문의 RUBIK Pi 3 측정 수치는 이 저장소에 없다. 그래서 여기서는 인용하거나 재해석하지 않는다. 연구 당시 코드는 tag [`research-baseline`](https://github.com/jsy202/RUBIK_PI_cluster/tree/research-baseline) (`4d4e3f8`)에 있다.
+| 항목 | 값 |
+|---|---|
+| 목표 UI update rate | 30 Hz |
+| 비교 기준 | 약 33.3 ms (30 Hz 한 주기, soft budget) |
+| 측정 횟수 | 1,000회 |
+| 평균 latency | **10.38 ms** |
+| 최대 latency | **21 ms** |
+
+RPM 수신 이후 Qt 렌더링 완료까지 1,000회 측정한 결과 평균 10.38 ms, 최대 21 ms로, 30 Hz 요구 기준인 약 33.3 ms 이내임을 확인했다.
+
+**측정 경계:** `RPM sample accepted by Qt application → QLabel paintEvent completed`
+
+| 포함 | 미포함 |
+|---|---|
+| Qt 애플리케이션이 sample을 받은 이후의 처리 | 센서 측정 |
+| 30 Hz throttle 대기 | UART/Serial 전송 시간 |
+| paintEvent 완료까지 | compositor / vsync |
+| | 실제 물리 디스플레이 표시 |
+
+코드 기준의 상세 정의: [validation/measurement_boundary.md](validation/measurement_boundary.md)
 
 ## Post-project Validation (2026-10, 연구 종료 후)
-요구 성능(30 Hz UI, 33.3 ms **soft budget**)을 측정 가능한 기준으로 정의하고, 하드웨어 없이 반복 가능한 입력으로 PASS/FAIL을 판정했다.
+이 후속 작업은 새로운 하드웨어 성능 수치를 주장하려는 것이 아니다. **기존 측정의 범위를 명확히 하고, 하드웨어 없이도 재현 가능한 SW 검증 환경을 추가한 것**이다. 연구 당시 코드는 tag [`research-baseline`](https://github.com/jsy202/RUBIK_PI_cluster/tree/research-baseline) (`4d4e3f8`)에 있다.
 
-**측정 경계는 코드 기준으로 `sample acceptance → paintEvent`다.**
-- 시작(`t_in`): 앱이 파싱된 샘플을 받아들인 시점
-- 끝(`t_frame`): rpmLabel의 `paintEvent`가 backing store에 그리기를 마친 시점
-- 포함: 30 Hz throttle 대기(0~33 ms)
-- 포함하지 않음: 센서, UART 전송, **물리 디스플레이 표시**
+- **Serial/RPM parser test:** 시리얼 파싱 로직을 동작 그대로 `rpmparser.h`로 옮겼다. 원래 `readSerialData` 루프와의 차등 테스트를 포함한 QtTest 16건을 작성했다(정상, 0, 음수, 경계, overflow, 잘못된 문자열, 분할·다중 프레임, 8 KiB 초과 등).
+- **Measurement boundary 명확화:** `t_in`과 `t_frame`이 코드에서 정확히 어느 시점인지, 무엇이 측정에 포함되고 무엇이 빠지는지를 문서화했다(위 표).
+- **Replay 가능한 regression 환경:** 선택 입력 `CLUSTER_REPLAY_FILE`(기본 비활성)과 PASS/FAIL 분석기 `scripts/validate_latency.py`를 추가했다. 기존 분석 스크립트와 jitter 정의는 그대로 유지했다.
+- **CI 기반 hardware-free test:** GitHub Actions에서 Docker로 앱을 빌드하고 QtTest와 분석 테스트(pytest 8건)를 실행한다.
 
-→ [measurement_boundary.md](validation/measurement_boundary.md)
+| 테스트 | PASS | FAILED |
+|---|---|---|
+| QtTest (parser) 16 | 16 | 0 |
+| pytest (analysis) 8 | 8 | 0 |
 
-변경한 것:
-- 시리얼 파서를 `rpmparser.h`로 그대로 옮겼다(동작 동일, 차등 테스트로 확인).
-- 선택적 replay 입력 `CLUSTER_REPLAY_FILE`을 추가했다(기본 비활성).
-- PASS/FAIL 분석기 `scripts/validate_latency.py`를 추가했다. 기존 분석 스크립트와 jitter 정의는 유지했다.
-
-## Key Findings
-**측정 환경: 개발 PC(x86_64) + Docker(Ubuntu 20.04, Qt 5.12.8) + Qt offscreen 플랫폼.** RUBIK Pi 3 하드웨어 결과가 아니며, 물리 디스플레이 지연도 아니다. 시나리오당 30 s × 3회.
-
-| 시나리오 | p95 (`t_in→t_frame`) | 표시·로그되지 않은 샘플 | 판정 (p95 ≤ 33.3 ms) |
-|---|---|---|---|
-| 기존 시뮬레이션 50 Hz | 20 ms | 약 40 % | PASS |
-| 입력 주기 = UI 주기 (33 ms) | 34 ms | 0 % | **FAIL** — 두 타이머의 위상 고정으로 throttle 대기가 거의 한 주기 |
-| 1 kHz 버스트 | 2 ms | 약 97 % | PASS. 하지만 대부분의 입력이 버려짐 |
-| 0/8000 교대 @20 ms | 21 ms | 약 79 % | PASS. 표시 값이 aliasing됨 |
-
-- 지연 통계는 **표시된 샘플에 대해서만** 계산된다. 그래서 analysis에 "로그되지 않은 샘플 수"를 함께 보고하도록 했다.
-- 같은 값이 반복되면 repaint가 없어 지연 표본이 생기지 않는다.
-
-→ [performance_report.md](validation/performance_report.md)
-
-## Input-rate Sweep (Post-project, 2026-10-02)
-**환경: 개발 PC + Docker + Qt offscreen, replay 입력. 하드웨어 검증이 아니다.** 측정 구간은 `sample acceptance → paintEvent`이며, 각 조건 15 s × 3회를 실행했다.
-
-| 입력 rate (명목) | 10 | 30 | 60 | 100 | 200 | 500 | 1000 (실측 938) |
-|---|---|---|---|---|---|---|---|
-| drop ratio | 0 % | 0 % | 48.4 % | 69.7 % | 84.8 % | 93.9 % | 96.8 % |
-| p95 latency | 32 ms | **34 ms (FAIL)** | 17 ms | 10.3 ms | 5 ms | 3 ms | 2 ms |
-
-입력 rate가 UI 주기(약 30 Hz)를 넘으면 **p95는 낮아지고 drop은 커진다.** 이는 성능 개선이 아니다. 지연 통계가 표시된 샘플에 대해서만 계산되기 때문이며, **latency 단독 지표가 처리 품질을 충분히 나타내지 못할 수 있음을 확인**한 결과다. 지연 측면의 최악 조건은 입력 주기가 UI 주기와 같은 30 Hz였다(위상 고정). → [rate_sweep/analysis.md](validation/rate_sweep/analysis.md)
-
-## Verification
-- **QtTest 16건**(Docker): 정상, 0, 음수 보정, int 경계, overflow, 잘못된 문자열, 빈 줄, CRLF, 분할 프레임, 다중 프레임, 반복값, 급변, 64/65바이트, 8 KiB 초과, 그리고 **원래 `readSerialData` 루프와의 차등 테스트**.
-- negative control: 변이 2종이 각각 1건씩 실패로 검출되었다. `.trimmed()` 제거는 등가 변이라 검출되지 않았고, 이 사실을 기록했다.
-- **pytest 8건**: 분석 스크립트의 통계, PASS/FAIL 판정, 종료 코드, 로그 누락 샘플 수 계산.
-- 성능 시나리오 5종 × 3회(`scripts/run_perf_scenarios.sh`): 측정이며, CI에는 넣지 않았다.
-- 문서: [requirements](validation/requirements.md) · [test cases](validation/test_cases.md) · [traceability](validation/traceability_matrix.md) · [limitations](validation/limitations.md)
-
-## Test Result
-| 테스트 | PASS | XFAIL | FAILED |
-|---|---|---|---|
-| QtTest 16 (+init/cleanup, Qt 집계 18) | 16 | 0 | 0 |
-| pytest 8 | 8 | 0 | 0 |
-
-로컬 실행 결과다. GitHub Actions 결과는 workflow `tests`를 참고한다.
-
-## Limitations
-- **RUBIK Pi 3, Arduino, 센서, 실제 디스플레이 없이** PC의 Docker offscreen 환경에서 측정했다. 연구 당시 결과와 같은 조건이 아니다.
-- 시리얼 수신 경로의 성능은 측정하지 않았다(파서는 기능 테스트만 함). `CLUSTER_ANIMATE`도 측정하지 않았다.
-- 33.3 ms는 hard real-time deadline이 아니라 soft budget이다.
+이 후속 작업은 RUBIK Pi 3 하드웨어, Arduino, 실제 디스플레이 없이 진행했다. 자세한 내용: [requirements](validation/requirements.md) · [test cases](validation/test_cases.md) · [traceability](validation/traceability_matrix.md) · [limitations](validation/limitations.md)
 
 ## How to Run Tests (하드웨어 불필요)
 ```bash
 docker build -f Dockerfile.test -t rubik-cluster-test . && docker run --rm rubik-cluster-test   # app 빌드 + QtTest
 python3 -m pip install pytest && python3 -m pytest                                              # 분석 테스트
-./scripts/run_perf_scenarios.sh                                                                 # (선택) 성능 시나리오, 약 8분
 ```
+
+## Additional Validation / Appendix
+개발 PC + Docker + Qt offscreen 환경에서 수행한 보조 분석이다. **RUBIK Pi 하드웨어 결과가 아니며, 위 Historical Result와 비교하지 않는다.**
+
+- PC/Docker validation scenarios: [validation/performance_report.md](validation/performance_report.md)
+- Input-rate sweep: [validation/rate_sweep/analysis.md](validation/rate_sweep/analysis.md)
+- Raw results / analysis: [validation/perf_results/](validation/perf_results/), [validation/rate_sweep/summary.csv](validation/rate_sweep/summary.csv), [validation/rate_sweep/raw_results.csv](validation/rate_sweep/raw_results.csv)
 
 ---
 
 ## Original Research Documentation (연구 당시 README 원문)
+
+> 아래는 연구 당시 README 원문이며 수정하지 않았다. 원문의 "E2E 지연시간"은 위에 적은 측정 경계(`sample accepted → paintEvent completed`)를 뜻하며, 센서나 물리 디스플레이를 포함하지 않는다.
 
 
 이 저장소는 **RUBIK PI 3 보드에서 Qt 기반 디지털 클러스터 시스템을 구현하고, 센서 데이터가 화면에 표시되기까지의 End-to-End(E2E) 지연시간을 측정하기 위한 프로젝트**입니다.
