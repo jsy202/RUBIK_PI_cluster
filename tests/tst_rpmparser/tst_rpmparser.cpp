@@ -150,6 +150,40 @@ private slots:
         QCOMPARE(feed(buf, "4321\n"), QVector<int>({4321}));  // parser recovers on the next line
     }
 
+    // Post-project robustness classes (input groups not covered above). Expected values are the
+    // existing behaviour; rows marked "lost" document inputs the protocol does not support.
+    void robustnessInputClasses_data()
+    {
+        QTest::addColumn<QByteArray>("input");
+        QTest::addColumn<QVector<int>>("expected");
+        QTest::newRow("explicit plus sign") << QByteArray("+300\n") << QVector<int>{300};
+        QTest::newRow("minus zero") << QByteArray("-0\n") << QVector<int>{0};
+        QTest::newRow("leading zeros") << QByteArray("007\n") << QVector<int>{7};
+        QTest::newRow("inner space rejected") << QByteArray("1 2\n9\n") << QVector<int>{9};
+        QTest::newRow("bare CR is not a separator (both values lost)") << QByteArray("2500\r3000\n") << QVector<int>{};
+        QTest::newRow("CR CR LF") << QByteArray("2500\r\r\n") << QVector<int>{2500};
+        QTest::newRow("only newlines") << QByteArray("\n\n\r\n\n") << QVector<int>{};
+        // DEF-SW-04: Qt 5.12 QString::toInt() stops at an embedded NUL, so these non-integer lines
+        // are accepted as 25 / 7 instead of being skipped like "12a" (REQ-IN-002). Not fixed.
+        QTest::newRow("DEF-SW-04 embedded NUL inside digits") << QByteArray("25\0" "00\n1\n", 8) << QVector<int>{1};
+        QTest::newRow("DEF-SW-04 NUL then letters") << QByteArray("7\0" "abc\n", 6) << QVector<int>{};
+        QTest::newRow("leading NUL rejected") << QByteArray("\0" "7\n1\n", 5) << QVector<int>{1};
+        QTest::newRow("high bytes rejected") << QByteArray("\xff\xfe\x80\n2\n") << QVector<int>{2};
+        QTest::newRow("10 000-digit line skipped") << QByteArray(10000, '9') + "\n3\n" << QVector<int>{3};
+        QTest::newRow("value then garbage then value") << QByteArray("1\n#\n2\n") << QVector<int>{1, 2};
+    }
+    void robustnessInputClasses()
+    {
+        QFETCH(QByteArray, input);
+        QFETCH(QVector<int>, expected);
+        QByteArray buf;
+        QEXPECT_FAIL("DEF-SW-04 embedded NUL inside digits", "DEF-SW-04: toInt stops at NUL (accepts 25)", Continue);
+        QEXPECT_FAIL("DEF-SW-04 NUL then letters", "DEF-SW-04: toInt stops at NUL (accepts 7)", Continue);
+        QCOMPARE(feed(buf, input), expected);
+        QVERIFY(!buf.contains('\n'));
+        QVERIFY(buf.size() <= kMaxBufferBytes);
+    }
+
     void extractedParserMatchesBaselineInlineCode()
     {
         // Differential check: same chunk sequence through both implementations, buffers compared too.
