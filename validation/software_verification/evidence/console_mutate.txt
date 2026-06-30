@@ -1,0 +1,26 @@
+baseline: all suites pass
+M01 equivalent (survived)    buffer cap comparison > -> >=  <- 
+M02 killed                   buffer cap (8 KiB) removed: unbounded buffer  <- FAIL!  : TstRpmParser::extractedParserMatchesBaselineInlineCode()
+M03 killed                   overflow policy: drop newest instead of oldest bytes  <- FAIL!  : TstRpmParser::bufferOverflowDropsOldestBytes() 'buf.isEmpty()' returned FALSE. (), FAIL!  : TstRpmParser::extractedParserMatchesBaselineInlin
+M04 killed                   line-length boundary > -> >= (64-byte line rejected)  <- FAIL!  : TstRpmParser::lineAtMaxLengthIsAcceptedLongerIsSkipped()
+M05 killed                   line-length check removed  <- FAIL!  : TstRpmParser::lineAtMaxLengthIsAcceptedLongerIsSkipped()
+M06 killed                   parse success/failure condition inverted  <- FAIL!  : TstMainWindow::animation(delta 1000: clamped to 180 ms), FAIL!  : TstMainWindow::animation(delta 45: 2*delta = 90 ms), FAIL!  : TstMainWindow
+M07 killed                   invalid-input rejection removed (failed parse appended as 0)  <- FAIL!  : TstMainWindow::replayPlaysAtConfiguredIntervalAndStops(), FAIL!  : TstMainWindow::replayUsesSerialLineProtocol(), FAIL!  : TstRpmParser::empt
+M08 killed                   off-by-one: line terminator not consumed  <- qttest-mainwindow: TIMEOUT, qttest-parser: TIMEOUT
+M09 equivalent (survived)    whitespace trimming removed  <- 
+M10 equivalent (survived)    negative clamp boundary < -> <=  <- 
+M11 killed                   negative RPM clamp removed  <- FAIL!  : TstMainWindow::negativeSampleIsDisplayedAsZeroAndRawIsLogged(), FAIL!  : TstMainWindow::replayUsesSerialLineProtocol(), FAIL!  : TstMainWindo
+M12 killed                   flush without pending sample not ignored  <- FAIL!  : TstMainWindow::animation(delta 1000: clamped to 180 ms), FAIL!  : TstMainWindow::animation(delta 45: 2*delta = 90 ms), FAIL!  : TstMainWindow
+M13 killed                   accepted sample value not stored (update skipped)  <- FAIL!  : TstMainWindow::animation(delta 1000: clamped to 180 ms), FAIL!  : TstMainWindow::animation(delta 45: 2*delta = 90 ms), FAIL!  : TstMainWindow
+M14 killed                   displayed-state update skipped  <- FAIL!  : TstMainWindow::animation(delta 1000: clamped to 180 ms), FAIL!  : TstMainWindow::animation(delta 45: 2*delta = 90 ms), FAIL!  : TstMainWindow
+M15 killed                   per-frame log de-duplication removed  <- FAIL!  : TstMainWindow::eachFrameIsLoggedOnceAfterPaint(), FAIL!  : TstMainWindow::flushWithoutPendingSampleChangesNothing(), FAIL!  : TstMainWindow::
+M16 killed                   animation threshold boundary < -> <=  <- FAIL!  : TstMainWindow::animation(delta 5: kSmallDelta, animated, clamped to 60)
+M17 killed                   animation duration conversion changed  <- FAIL!  : TstMainWindow::animation(delta 45: 2*delta = 90 ms), FAIL!  : TstMainWindow::animation(delta 90: 2*delta = 180 ms (upper clamp)), XPASS  : Ts
+M18 killed                   speed conversion ratio inverted  <- FAIL!  : TstMainWindow::speedIsDerivedFromDisplayedRpm(), XPASS  : TstMainWindow::knownDefect_speedOverflowForHugeRpm() 'speedLabel(w)->text().toInt()
+M19 killed                   latency sign inverted in CSV  <- FAIL!  : TstMainWindow::eachFrameIsLoggedOnceAfterPaint()
+M20 killed                   sample sequence number not incremented  <- FAIL!  : TstMainWindow::eachFrameIsLoggedOnceAfterPaint(), FAIL!  : TstMainWindow::flushWithoutPendingSampleChangesNothing(), FAIL!  : TstMainWindow::
+M21 killed                   replay end-of-input boundary >= -> >  <- FAIL!  : TstMainWindow::replayPlaysAtConfiguredIntervalAndStops(), FAIL!  : TstMainWindow::replayUsesSerialLineProtocol()
+P01 killed                   PASS/FAIL verdict boundary <= -> <  <- FAILED tests/analysis/test_latency_analysis.py::test_verdict_boundary_p95_equal_to_budget_passes
+P02 killed                   not-logged sample count off by one  <- FAILED tests/analysis/test_latency_analysis.py::test_seq_gaps_count_samples_not_logged
+P03 killed                   percentile rank formula changed  <- FAILED tests/analysis/test_latency_analysis.py::test_cli_exit_codes, FAILED tests/analysis/test_latency_analysis.py::test_existing_analyze_script_runs
+{"total": 24, "killed": 21, "survived": 0, "equivalent": 3, "invalid": 0, "score": "21/21 = 100.0%"}

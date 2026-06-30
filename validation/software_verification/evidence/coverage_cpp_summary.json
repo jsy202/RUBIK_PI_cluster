@@ -1,0 +1,51 @@
+{
+    "branch_covered": 195,
+    "branch_percent": 84.4,
+    "branch_total": 231,
+    "files": [
+        {
+            "branch_covered": 178,
+            "branch_percent": 83.6,
+            "branch_total": 213,
+            "filename": "mainwindow.cpp",
+            "function_covered": 16,
+            "function_percent": 100.0,
+            "function_total": 16,
+            "line_covered": 172,
+            "line_percent": 96.6,
+            "line_total": 178
+        },
+        {
+            "branch_covered": 17,
+            "branch_percent": 94.4,
+            "branch_total": 18,
+            "filename": "rpmparser.h",
+            "function_covered": 2,
+            "function_percent": 100.0,
+            "function_total": 2,
+            "line_covered": 16,
+            "line_percent": 100.0,
+            "line_total": 16
+        },
+        {
+            "branch_covered": 0,
+            "branch_percent": null,
+            "branch_total": 0,
+            "filename": "timestamplabel.h",
+            "function_covered": 1,
+            "function_percent": 100.0,
+            "function_total": 1,
+            "line_covered": 4,
+            "line_percent": 100.0,
+            "line_total": 4
+        }
+    ],
+    "function_covered": 19,
+    "function_percent": 100.0,
+    "function_total": 19,
+    "gcovr/summary_format_version": "0.6",
+    "line_covered": 192,
+    "line_percent": 97.0,
+    "line_total": 198,
+    "root": "../src"
+}

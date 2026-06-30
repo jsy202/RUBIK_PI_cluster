@@ -1,0 +1,48 @@
+INFO: Seed: 160851769
+INFO: Loaded 1 modules   (556 inline 8-bit counters): 556 [0x5b60e8, 0x5b6314), 
+INFO: Loaded 1 PC tables (556 PCs): 556 [0x5b6318,0x5b85d8), 
+INFO:       13 files found in /b/negctl/cap_removed_noseed/corpus
+INFO: seed corpus: files: 13 min: 3b max: 104b total: 419b rss: 29Mb
+#14	INITED cov: 193 ft: 580 corp: 13/419b exec/s: 0 rss: 30Mb
+#16	NEW    cov: 193 ft: 581 corp: 14/490b lim: 12000 exec/s: 0 rss: 30Mb L: 71/104 MS: 2 ShuffleBytes-CopyPart-
+#18	NEW    cov: 193 ft: 584 corp: 15/562b lim: 12000 exec/s: 0 rss: 30Mb L: 72/104 MS: 2 InsertByte-ChangeBit-
+#21	REDUCE cov: 193 ft: 584 corp: 15/556b lim: 12000 exec/s: 0 rss: 30Mb L: 6/104 MS: 3 ChangeByte-ChangeASCIIInt-EraseBytes-
+#26	NEW    cov: 193 ft: 608 corp: 16/626b lim: 12000 exec/s: 0 rss: 30Mb L: 70/104 MS: 5 InsertRepeatedBytes-ChangeBinInt-InsertRepeatedBytes-ChangeByte-CopyPart-
+#27	NEW    cov: 193 ft: 610 corp: 17/635b lim: 12000 exec/s: 0 rss: 31Mb L: 9/104 MS: 1 InsertByte-
+#28	NEW    cov: 193 ft: 615 corp: 18/707b lim: 12000 exec/s: 0 rss: 31Mb L: 72/104 MS: 1 ChangeBinInt-
+#30	NEW    cov: 193 ft: 622 corp: 19/850b lim: 12000 exec/s: 0 rss: 31Mb L: 143/143 MS: 2 ChangeASCIIInt-CrossOver-
+#31	NEW    cov: 193 ft: 656 corp: 20/902b lim: 12000 exec/s: 0 rss: 31Mb L: 52/143 MS: 1 EraseBytes-
+#33	NEW    cov: 193 ft: 658 corp: 21/975b lim: 12000 exec/s: 0 rss: 31Mb L: 73/143 MS: 2 ShuffleBytes-InsertByte-
+#36	NEW    cov: 193 ft: 664 corp: 22/1048b lim: 12000 exec/s: 0 rss: 31Mb L: 73/143 MS: 3 ChangeByte-ChangeByte-ChangeByte-
+#39	NEW    cov: 193 ft: 699 corp: 23/1276b lim: 12000 exec/s: 0 rss: 31Mb L: 228/228 MS: 3 ShuffleBytes-CrossOver-CopyPart-
+#42	NEW    cov: 193 ft: 701 corp: 24/1428b lim: 12000 exec/s: 0 rss: 31Mb L: 152/228 MS: 3 EraseBytes-CrossOver-CrossOver-
+#54	NEW    cov: 193 ft: 707 corp: 25/1556b lim: 12000 exec/s: 0 rss: 31Mb L: 128/228 MS: 2 ChangeBit-CopyPart-
+ORACLE VIOLATION: O3 differs from baseline loop
+==1376== ERROR: libFuzzer: deadly signal
+    #0 0x527e51 in __sanitizer_print_stack_trace (/b/negctl/cap_removed_noseed/fuzz+0x527e51)
+    #1 0x472fa8 in fuzzer::PrintStackTrace() (/b/negctl/cap_removed_noseed/fuzz+0x472fa8)
+    #2 0x4580f3 in fuzzer::Fuzzer::CrashCallback() (/b/negctl/cap_removed_noseed/fuzz+0x4580f3)
+    #3 0x7ffff773641f  (/lib/x86_64-linux-gnu/libpthread.so.0+0x1441f)
+    #4 0x7ffff754600a in raise (/lib/x86_64-linux-gnu/libc.so.6+0x4300a)
+    #5 0x7ffff7525858 in abort (/lib/x86_64-linux-gnu/libc.so.6+0x22858)
+    #6 0x551bd4 in LLVMFuzzerTestOneInput /b/negctl/cap_removed_noseed/src/tests/fuzz/fuzz_rpmparser.cpp:66:9
+    #7 0x4597b1 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) (/b/negctl/cap_removed_noseed/fuzz+0x4597b1)
+    #8 0x458ef5 in fuzzer::Fuzzer::RunOne(unsigned char const*, unsigned long, bool, fuzzer::InputInfo*, bool*) (/b/negctl/cap_removed_noseed/fuzz+0x458ef5)
+    #9 0x45b197 in fuzzer::Fuzzer::MutateAndTestOne() (/b/negctl/cap_removed_noseed/fuzz+0x45b197)
+    #10 0x45be95 in fuzzer::Fuzzer::Loop(std::__Fuzzer::vector<fuzzer::SizedFile, fuzzer::fuzzer_allocator<fuzzer::SizedFile> >&) (/b/negctl/cap_removed_noseed/fuzz+0x45be95)
+    #11 0x44a84e in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) (/b/negctl/cap_removed_noseed/fuzz+0x44a84e)
+    #12 0x473692 in main (/b/negctl/cap_removed_noseed/fuzz+0x473692)
+    #13 0x7ffff7527082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+    #14 0x41f5ed in _start (/b/negctl/cap_removed_noseed/fuzz+0x41f5ed)
+
+NOTE: libFuzzer has rudimentary signal handlers.
+      Combine libFuzzer with AddressSanitizer or similar for better crash reports.
+SUMMARY: libFuzzer: deadly signal
+MS: 2 EraseBytes-CrossOver-; base unit: 27319462065895e5b6b0300d6b02fa30a5906082
+artifact_prefix='/b/negctl/cap_removed_noseed/'; Test unit written to /b/negctl/cap_removed_noseed/crash-1831f670f6f4ae557f915b94d7eed55c0008a9a2
+--- injected: sed 's/buffer.remove(0, buffer.size() - maxBufferBytes);/;/' rpmparser.h
+26c26
+<         buffer.remove(0, buffer.size() - maxBufferBytes);
+---
+>         ;
+--- fuzzer exit code: 77 after 0 s (limit 120 s)

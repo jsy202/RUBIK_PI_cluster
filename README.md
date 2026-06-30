@@ -14,7 +14,7 @@ Sensor → Arduino → Serial → readSerialData() → acceptRpmSample()  [t_in]
 ## Historical Research Result (original research / poster)
 
 > **출처: original research poster result.** RUBIK Pi 3 연구 환경에서 측정한 값이다. 원본 측정 CSV는 이 저장소에 포함되어 있지 않다.
-> 아래의 Post-project Validation(PC/Docker)과는 별개이며, 그 결과와 섞거나 같은 조건으로 비교하지 않는다.
+> 아래의 Post-project Software Verification(PC/Docker)과는 별개이며, 그 결과와 섞거나 같은 조건으로 비교하지 않는다.
 
 | 항목 | 값 |
 |---|---|
@@ -26,7 +26,9 @@ Sensor → Arduino → Serial → readSerialData() → acceptRpmSample()  [t_in]
 
 RPM 수신 이후 Qt 렌더링 완료까지 1,000회 측정한 결과 평균 10.38 ms, 최대 21 ms로, 30 Hz 요구 기준인 약 33.3 ms 이내임을 확인했다.
 
-**측정 경계:** `RPM sample accepted by Qt application → QLabel paintEvent completed`
+## Measurement Boundary
+
+`RPM sample accepted by Qt application → QLabel paintEvent completed`
 
 | 포함 | 미포함 |
 |---|---|
@@ -37,25 +39,33 @@ RPM 수신 이후 Qt 렌더링 완료까지 1,000회 측정한 결과 평균 10.
 
 코드 기준의 상세 정의: [validation/measurement_boundary.md](validation/measurement_boundary.md)
 
-## Post-project Validation (2026-10, 연구 종료 후)
-이 후속 작업은 새로운 하드웨어 성능 수치를 주장하려는 것이 아니다. **기존 측정의 범위를 명확히 하고, 하드웨어 없이도 재현 가능한 SW 검증 환경을 추가한 것**이다. 연구 당시 코드는 tag [`research-baseline`](https://github.com/jsy202/RUBIK_PI_cluster/tree/research-baseline) (`4d4e3f8`)에 있다.
+## Post-project Software Verification (2026-10, 연구 종료 후)
+이 후속 작업은 새로운 하드웨어 성능 수치를 주장하려는 것이 아니다. **RUBIK Pi 3 하드웨어 없이**, 기존 실제 하드웨어 연구 이후 host 기반 환경(개발 PC + Docker, Qt offscreen)에서 SW 입력 처리와 회귀시험의 검증 범위를 넓힌 것이다. 연구 당시 코드는 tag [`research-baseline`](https://github.com/jsy202/RUBIK_PI_cluster/tree/research-baseline) (`4d4e3f8`)에 있다.
 
-- **Serial/RPM parser test:** 시리얼 파싱 로직을 동작 그대로 `rpmparser.h`로 옮겼다. 원래 `readSerialData` 루프와의 차등 테스트를 포함한 QtTest 16건을 작성했다(정상, 0, 음수, 경계, overflow, 잘못된 문자열, 분할·다중 프레임, 8 KiB 초과 등).
+- **Serial/RPM parser test:** 시리얼 파싱 로직을 동작 그대로 `rpmparser.h`로 옮겼다. 원래 `readSerialData` 루프와의 차등 테스트를 포함한 QtTest를 작성했다.
 - **Measurement boundary 명확화:** `t_in`과 `t_frame`이 코드에서 정확히 어느 시점인지, 무엇이 측정에 포함되고 무엇이 빠지는지를 문서화했다(위 표).
-- **Replay 가능한 regression 환경:** 선택 입력 `CLUSTER_REPLAY_FILE`(기본 비활성)과 PASS/FAIL 분석기 `scripts/validate_latency.py`를 추가했다. 기존 분석 스크립트와 jitter 정의는 그대로 유지했다.
-- **CI 기반 hardware-free test:** GitHub Actions에서 Docker로 앱을 빌드하고 QtTest와 분석 테스트(pytest 8건)를 실행한다.
+- **Replay 가능한 regression 환경:** 선택 입력 `CLUSTER_REPLAY_FILE`(기본 비활성)과 PASS/FAIL 분석기 `scripts/validate_latency.py`를 추가했다.
+- **Coverage / mutation / fuzz (validation-sw-hardening):** production 코드는 바꾸지 않고, MainWindow의 30 Hz 갱신·CSV 계측·속도 변환을 offscreen QtTest로 실행했다. 그 위에 coverage, 손으로 고른 mutation, parser fuzzing을 수행했다. 그 결과 고치지 않은 결함 4건(UB 2건, 측정 의미 1건, NUL 입력 수용 1건)을 재현해 기록했다.
 
-| 테스트 | PASS | FAILED |
-|---|---|---|
-| QtTest (parser) 16 | 16 | 0 |
-| pytest (analysis) 8 | 8 | 0 |
+| 항목 (host, PC/Docker) | 결과 |
+|---|---|
+| Code coverage (C++ app logic, gcov) | line 97.0% · function 100% · branch 84.4% (기존 테스트만: line 8.1%) |
+| Requirement coverage | SW requirement 17개 중 17개가 test와 연결됨 (하드웨어 의존 2개는 *Not revalidated*) |
+| Mutation (손으로 고른 24개) | 21 killed / 0 survived / 3 equivalent (테스트 1건 보강 전 19/20) |
+| Fuzz (libFuzzer + ASan/UBSan, `rpmparser.h`) | 600 s, 1,203,649 inputs, crash 0, sanitizer violation 0 |
+| Tests | QtTest parser 17 함수 · MainWindow 20 함수, pytest 11 — 전부 PASS (known defect 4건은 XFAIL로 고정) |
 
-이 후속 작업은 RUBIK Pi 3 하드웨어, Arduino, 실제 디스플레이 없이 진행했다. 자세한 내용: [requirements](validation/requirements.md) · [test cases](validation/test_cases.md) · [traceability](validation/traceability_matrix.md) · [limitations](validation/limitations.md)
+자세한 내용: [coverage](validation/software_verification/coverage_report.md) · [traceability](validation/software_verification/requirements_traceability.md) · [mutation](validation/software_verification/mutation_report.md) · [fuzz](validation/software_verification/fuzz_report.md) · [limitations](validation/software_verification/limitations.md) · 이전 정리: [requirements](validation/requirements.md) · [test cases](validation/test_cases.md) · [limitations](validation/limitations.md)
 
-## How to Run Tests (하드웨어 불필요)
+### How to Run Tests (하드웨어 불필요)
 ```bash
-docker build -f Dockerfile.test -t rubik-cluster-test . && docker run --rm rubik-cluster-test   # app 빌드 + QtTest
-python3 -m pip install pytest && python3 -m pytest                                              # 분석 테스트
+docker build -f Dockerfile.test -t rubik-cluster-test . && docker run --rm rubik-cluster-test   # app 빌드 + parser QtTest
+python3 -m pip install pytest && python3 -m pytest                                              # 분석/추적성 테스트
+
+# coverage / sanitizer / fuzz / mutation (Dockerfile.verify)
+docker build -f Dockerfile.verify -t rubik-verify .
+docker run --rm --security-opt seccomp=unconfined -v "$PWD":/src:ro -v "$PWD/.verify-out":/out \
+    rubik-verify bash /src/scripts/sw_verify.sh all     # 또는 tests | coverage | sanitize | fuzz 600 | mutate | negctl
 ```
 
 ## Additional Validation / Appendix
