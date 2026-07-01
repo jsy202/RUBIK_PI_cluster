@@ -150,38 +150,80 @@ private slots:
         QCOMPARE(feed(buf, "4321\n"), QVector<int>({4321}));  // parser recovers on the next line
     }
 
-    // Post-project robustness classes (input groups not covered above). Expected values are the
-    // existing behaviour; rows marked "lost" document inputs the protocol does not support.
+    // Post-project robustness classes and the number-format contract of one line:
+    //   optional surrounding ASCII whitespace, optional single sign, one or more decimal digits,
+    //   value within int and <= 911420367 (largest RPM whose speed fits int in update_values()).
+    // Expected values are the contract; "defect" names the row's known deviation (QEXPECT_FAIL).
     void robustnessInputClasses_data()
     {
         QTest::addColumn<QByteArray>("input");
         QTest::addColumn<QVector<int>>("expected");
-        QTest::newRow("explicit plus sign") << QByteArray("+300\n") << QVector<int>{300};
-        QTest::newRow("minus zero") << QByteArray("-0\n") << QVector<int>{0};
-        QTest::newRow("leading zeros") << QByteArray("007\n") << QVector<int>{7};
-        QTest::newRow("inner space rejected") << QByteArray("1 2\n9\n") << QVector<int>{9};
-        QTest::newRow("bare CR is not a separator (both values lost)") << QByteArray("2500\r3000\n") << QVector<int>{};
-        QTest::newRow("CR CR LF") << QByteArray("2500\r\r\n") << QVector<int>{2500};
-        QTest::newRow("only newlines") << QByteArray("\n\n\r\n\n") << QVector<int>{};
-        // DEF-SW-04: Qt 5.12 QString::toInt() stops at an embedded NUL, so these non-integer lines
-        // are accepted as 25 / 7 instead of being skipped like "12a" (REQ-IN-002). Not fixed.
-        QTest::newRow("DEF-SW-04 embedded NUL inside digits") << QByteArray("25\0" "00\n1\n", 8) << QVector<int>{1};
-        QTest::newRow("DEF-SW-04 NUL then letters") << QByteArray("7\0" "abc\n", 6) << QVector<int>{};
-        QTest::newRow("leading NUL rejected") << QByteArray("\0" "7\n1\n", 5) << QVector<int>{1};
-        QTest::newRow("high bytes rejected") << QByteArray("\xff\xfe\x80\n2\n") << QVector<int>{2};
-        QTest::newRow("10 000-digit line skipped") << QByteArray(10000, '9') + "\n3\n" << QVector<int>{3};
-        QTest::newRow("value then garbage then value") << QByteArray("1\n#\n2\n") << QVector<int>{1, 2};
+        QTest::addColumn<QString>("defect");
+        const QString none;
+        // existing behaviour kept
+        QTest::newRow("explicit plus sign") << QByteArray("+300\n") << QVector<int>{300} << none;
+        QTest::newRow("minus zero") << QByteArray("-0\n") << QVector<int>{0} << none;
+        QTest::newRow("leading zeros") << QByteArray("007\n") << QVector<int>{7} << none;
+        QTest::newRow("inner space rejected") << QByteArray("1 2\n9\n") << QVector<int>{9} << none;
+        QTest::newRow("bare CR is not a separator (both values lost)") << QByteArray("2500\r3000\n") << QVector<int>{} << none;
+        QTest::newRow("CR CR LF") << QByteArray("2500\r\r\n") << QVector<int>{2500} << none;
+        QTest::newRow("only newlines") << QByteArray("\n\n\r\n\n") << QVector<int>{} << none;
+        QTest::newRow("high bytes rejected") << QByteArray("\xff\xfe\x80\n2\n") << QVector<int>{2} << none;
+        QTest::newRow("10 000-digit line skipped") << QByteArray(10000, '9') + "\n3\n" << QVector<int>{3} << none;
+        QTest::newRow("value then garbage then value") << QByteArray("1\n#\n2\n") << QVector<int>{1, 2} << none;
+        // whitespace
+        QTest::newRow("ws: spaces around") << QByteArray(" 7 \n") << QVector<int>{7} << none;
+        QTest::newRow("ws: tab, CR around negative") << QByteArray("\t-7\r\n") << QVector<int>{-7} << none;
+        QTest::newRow("ws: VT and FF around") << QByteArray("\v7\f\n") << QVector<int>{7} << none;
+        QTest::newRow("ws: whitespace-only line") << QByteArray(" \t \n") << QVector<int>{} << none;
+        // sign
+        QTest::newRow("sign: plus alone") << QByteArray("+\n") << QVector<int>{} << none;
+        QTest::newRow("sign: minus alone") << QByteArray("-\n") << QVector<int>{} << none;
+        QTest::newRow("sign: two signs") << QByteArray("+-7\n--7\n") << QVector<int>{} << none;
+        QTest::newRow("sign: trailing sign") << QByteArray("7-\n") << QVector<int>{} << none;
+        QTest::newRow("sign: space after sign") << QByteArray("- 7\n") << QVector<int>{} << none;
+        // trailing garbage / other number syntaxes
+        QTest::newRow("garbage: letters") << QByteArray("7abc\n") << QVector<int>{} << none;
+        QTest::newRow("garbage: space then letters") << QByteArray("7 abc\n") << QVector<int>{} << none;
+        QTest::newRow("garbage: decimal point") << QByteArray("7.0\n") << QVector<int>{} << none;
+        QTest::newRow("garbage: exponent") << QByteArray("1e3\n") << QVector<int>{} << none;
+        QTest::newRow("garbage: hex") << QByteArray("0x1F\n") << QVector<int>{} << none;
+        QTest::newRow("garbage: separator") << QByteArray("1,000\n1_000\n") << QVector<int>{} << none;
+        // embedded NUL (DEF-SW-04: Qt 5.12 QString::toInt() stops at NUL)
+        QTest::newRow("NUL inside digits") << QByteArray("25\0" "00\n1\n", 8) << QVector<int>{1} << "DEF-SW-04";
+        QTest::newRow("NUL then letters") << QByteArray("7\0" "abc\n", 6) << QVector<int>{} << "DEF-SW-04";
+        QTest::newRow("trailing NUL") << QByteArray("7\0" "\n", 3) << QVector<int>{} << "DEF-SW-04";
+        QTest::newRow("leading NUL") << QByteArray("\0" "7\n1\n", 5) << QVector<int>{1} << none;
+        QTest::newRow("NUL-only line between frames") << QByteArray("7\n\0\n8\n", 6) << QVector<int>{7, 8} << none;
+        // overflow and upper bound (DEF-SW-01: larger values make update_values() overflow)
+        QTest::newRow("overflow: INT_MAX + 1") << QByteArray("2147483648\n") << QVector<int>{} << none;
+        QTest::newRow("overflow: INT_MIN - 1") << QByteArray("-2147483649\n") << QVector<int>{} << none;
+        QTest::newRow("overflow: 20 digits") << QByteArray("99999999999999999999\n") << QVector<int>{} << none;
+        QTest::newRow("bound: largest speed-safe RPM") << QByteArray("911420367\n") << QVector<int>{911420367} << none;
+        QTest::newRow("bound: one above") << QByteArray("911420368\n") << QVector<int>{} << "DEF-SW-01";
+        QTest::newRow("bound: INT_MAX") << QByteArray("2147483647\n") << QVector<int>{} << "DEF-SW-01";
+        QTest::newRow("bound: INT_MIN still accepted (clamped later)") << QByteArray("-2147483648\n") << QVector<int>{INT_MIN} << none;
     }
     void robustnessInputClasses()
     {
         QFETCH(QByteArray, input);
         QFETCH(QVector<int>, expected);
+        QFETCH(QString, defect);
         QByteArray buf;
-        QEXPECT_FAIL("DEF-SW-04 embedded NUL inside digits", "DEF-SW-04: toInt stops at NUL (accepts 25)", Continue);
-        QEXPECT_FAIL("DEF-SW-04 NUL then letters", "DEF-SW-04: toInt stops at NUL (accepts 7)", Continue);
+        if (!defect.isEmpty())
+            QEXPECT_FAIL("", qPrintable(defect + " (known, not fixed yet)"), Continue);
         QCOMPARE(feed(buf, input), expected);
         QVERIFY(!buf.contains('\n'));
         QVERIFY(buf.size() <= kMaxBufferBytes);
+    }
+
+    void nulAcrossReadBoundaryIsRejected()
+    {
+        // frame boundary: the digits and the NUL-containing tail arrive in different reads
+        QByteArray buf;
+        QCOMPARE(feed(buf, "7"), QVector<int>());
+        QEXPECT_FAIL("", "DEF-SW-04 (known, not fixed yet)", Continue);
+        QCOMPARE(feed(buf, QByteArray("\0" "abc\n8\n", 7)), QVector<int>{8});
     }
 
     void extractedParserMatchesBaselineInlineCode()
