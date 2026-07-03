@@ -432,14 +432,12 @@ private slots:
     // Each check states the expected behaviour; QEXPECT_FAIL records the current deviation, so the
     // test turns into XPASS (= failure) if the behaviour changes and the record must be updated.
 
-    // DEF-SW-01: update_values() converts rpm * 2.356... (double) back to int. Above 911420367 the
-    // result is not representable: undefined behaviour (UBSan float-cast-overflow; x86-64 shows
-    // INT_MIN). Contract: the largest speed-safe RPM is accepted and gives a valid speed; a larger
-    // input value is rejected before it reaches the display or the speed calculation.
-    void knownDefect_speedOverflowForHugeRpm()
+    // REQ-IN-005 / REQ-UI-003, DEF-SW-01 (fixed): update_values() converts rpm * 2.356... (double)
+    // back to int; above 911420367 that was undefined behaviour (UBSan float-cast-overflow, x86-64
+    // showed INT_MIN). The largest speed-safe RPM is accepted and gives a valid speed; a larger input
+    // value is rejected by the parser before it reaches the display or the speed calculation.
+    void speedStaysRepresentableUpToRpmBound()
     {
-        if (qEnvironmentVariableIsSet("RUBIK_SKIP_KNOWN_UB"))
-            QSKIP("known UB, recorded in the separate known-defect sanitizer run");
         EnvGuard env{{"CLUSTER_REPLAY_FILE", writeReplay("911420367\n2147483647\n").toLocal8Bit()},
                      {"CLUSTER_REPLAY_INTERVAL_MS", QByteArray::number(kNeverMs)}};
         MainWindow w;
@@ -454,9 +452,7 @@ private slots:
         feed(w);                                       // 2147483647
         invoke(w, "flushPendingRpm");
         invoke(w, "update_values");
-        QEXPECT_FAIL("", "DEF-SW-01: value above 911420367 is accepted", Continue);
         QCOMPARE(w.displayRpm(), 911420367);
-        QEXPECT_FAIL("", "DEF-SW-01: speed int conversion overflows (UB)", Continue);
         QVERIFY(speedLabel(w)->text().toInt() >= 0);
     }
 
