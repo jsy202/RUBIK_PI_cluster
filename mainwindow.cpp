@@ -107,7 +107,7 @@ void MainWindow::flushPendingRpm()
     const qint64 tIn = m_pendingSerialTime;
 
     const int start = m_displayRpm;
-    const int delta = std::abs(target - start);
+    const qint64 delta = std::abs(qint64(target) - start);   // 64-bit: no overflow for any ints (DEF-SW-02)
 
     m_pendingRpm = -1;
     m_pendingRawRpm = -1;
@@ -132,7 +132,7 @@ void MainWindow::flushPendingRpm()
         return;
     }
 
-    const int dur = std::clamp(delta * 2, 60, 180);
+    const int dur = int(2 * std::clamp<qint64>(delta, 30, 90));   // == clamp(2*delta, 60, 180), no overflow (DEF-SW-02)
     if (m_rpmAnimation->state() == QAbstractAnimation::Running)
         m_rpmAnimation->stop();
     m_rpmAnimation->setDuration(dur);
