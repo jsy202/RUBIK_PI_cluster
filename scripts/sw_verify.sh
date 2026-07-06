@@ -137,7 +137,10 @@ stage_negctl() {
     #    (the fuzzer has to generate a long enough input itself)
     fuzz_negctl cap_removed 's/buffer.remove(0, buffer.size() - maxBufferBytes);/;/' 120
     fuzz_negctl cap_removed_noseed 's/buffer.remove(0, buffer.size() - maxBufferBytes);/;/' 120 overflow_9k
-    # 5: ASan must catch an out-of-bounds read in the parser (line copied from 70 bytes before '\n')
+    # 5-6: the independent-reference oracle (O6) must catch a regression of each parser fix
+    fuzz_negctl bound_removed 's/return ok \&\& value <= kMaxRpm;/return ok;/' 120
+    fuzz_negctl format_check_removed "s/if (t.at(i) < '0' || t.at(i) > '9')/if (false)/" 120
+    # 7: ASan must catch an out-of-bounds read in the parser (line copied from 70 bytes before '\n')
     fuzz_negctl oob_read 's/QByteArray line = buffer.left(nl);/QByteArray line(buffer.constData() + nl - 70, 70);/' 120
 }
 
