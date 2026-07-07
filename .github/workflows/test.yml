@@ -7,6 +7,7 @@ name: tests
 on:
   push:
   pull_request:
+  workflow_dispatch:
 
 jobs:
   qt:
@@ -43,7 +44,9 @@ jobs:
       - name: Tests, coverage, sanitizers, fuzz smoke
         run: |
           mkdir -p .verify-out
-          for stage in tests coverage sanitize "fuzz 60"; do
+          # asan_probe first: records whether the ASan runtime starts reliably on this runner's kernel
+          # (fails only if a run under `setarch -R` fails; no retries anywhere)
+          for stage in tests coverage "asan_probe 20" sanitize "fuzz 60"; do
             echo "::group::$stage"
             # seccomp=unconfined only to allow `setarch -R` for the ASan runtime (see scripts/sw_verify.sh)
             docker run --rm --security-opt seccomp=unconfined -v "$PWD":/src:ro -v "$PWD/.verify-out":/out \
@@ -52,7 +55,9 @@ jobs:
           done
       - name: Coverage summary
         if: always()
-        run: cat .verify-out/coverage_modules.md >> "$GITHUB_STEP_SUMMARY" || true
+        run: |
+          cat .verify-out/coverage_modules.md >> "$GITHUB_STEP_SUMMARY" || true
+          { echo; echo '```'; cat .verify-out/asan_probe.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY" || true
       - uses: actions/upload-artifact@v4
         if: always()
         with:

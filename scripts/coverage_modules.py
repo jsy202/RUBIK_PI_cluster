@@ -11,7 +11,7 @@ import json
 import sys
 
 MODULES = [
-    ("RPM parser / input validation", "rpmparser.h", ["RpmParser::consume", "RpmParser::correct"]),
+    ("RPM parser / input validation", "rpmparser.h", ["RpmParser::consume", "RpmParser::parseLine", "RpmParser::correct"]),
     ("Input sources (serial, replay, simulation)", "mainwindow.cpp",
      ["MainWindow::readSerialData", "MainWindow::setupSerialPort", "MainWindow::setupReplay",
       "MainWindow::feedReplaySample", "MainWindow::setupSimulation", "MainWindow::generateSimulatedRpm"]),
