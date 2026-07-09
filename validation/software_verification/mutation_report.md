@@ -3,7 +3,37 @@
 > 환경: 개발 PC + Docker(`Dockerfile.verify`, Ubuntu 20.04, Qt 5.12.8, GCC 9.3). RUBIK Pi 3 결과가 아니다.
 > 실행: `scripts/sw_verify.sh mutate` → `scripts/mutation_test.py`. 원본: [`evidence/mutation_results.json`](evidence/mutation_results.json), [`evidence/console_mutate.txt`](evidence/console_mutate.txt).
 
-## 방법
+## 결함 수정 후 결과 (`dae0620`) — 최신
+
+수정 코드(DEF-SW-01/02/04)에 맞춰 mutant 목록을 갱신했다. 기존 24개는 같은 결함 유형을 유지하면서 새 코드의 해당 위치를 가리키도록 패턴만 바꿨다(M06, M07, M09, M17). 수정 코드 자체를 겨냥한 N01–N06 6개를 추가했다. 원본: [`evidence/after_fixes/mutation_results.json`](evidence/after_fixes/mutation_results.json).
+
+| 항목 | 수정 전 (`f9e211c`) | 수정 후 (`dae0620`) |
+|---|---:|---:|
+| 총 mutation | 24 | 30 |
+| killed | 21 | 27 |
+| survived | 0 | 0 |
+| equivalent (점수 제외) | 3 (M01, M09, M10) | 3 (M01, M10, N04) |
+| invalid | 0 | 0 |
+| **Mutation Score** | 21/21 = 100% | **27/27 = 100%** |
+
+| ID | 변경 | 모사하는 결함 | 결과 | 검출한 테스트 (대표) |
+|---|---|---|---|---|
+| N01 | 숫자 형식 검사 → `if (false)` | DEF-SW-04 재발 | killed | `nulAcrossReadBoundaryIsRejected`, `robustnessInputClasses(NUL …)` |
+| N02 | `t.at(i) > '9'` → `>= '9'` | 숫자 범위 경계 | killed | `animation(delta 90 …)`, `speedStaysRepresentableUpToRpmBound` 외 |
+| N03 | `+` 부호 허용 제거 | 기존 허용 형식 회귀 | killed | `robustnessInputClasses(explicit plus sign)`, `extractedParserMatchesBaselineInlineCode` |
+| N04 | 빈 줄·부호만 있는 줄 guard 삭제 | – | **equivalent** | – (아래 근거) |
+| N05 | `value <= kMaxRpm` → `<` | 상한 경계 off-by-one | killed | `robustnessInputClasses(bound: largest …)`, `intBoundaries` 외 |
+| N06 | 상한 검사 삭제 | DEF-SW-01 재발 | killed | `speedStaysRepresentableUpToRpmBound`, `robustnessInputClasses(bound: INT_MAX)` 외 |
+| M09 | `line.trimmed()` → `line` | 공백 제거 누락 | killed (수정 전에는 equivalent) | `crlfAndSurroundingSpacesAreTolerated`, `serialPathViaPseudoTerminal` 외 |
+| M17 | `2 * clamp(delta, 30, 90)` → `clamp(delta, 30, 90)` | 애니메이션 시간 변환 오류 | killed | `animation(delta 45/90/1000 …)` |
+
+**Equivalent 근거:**
+- N04: guard가 없어도 빈 문자열과 `"+"`, `"-"`는 숫자 검사를 통과한 뒤 `QByteArray::toInt()`에서 `ok == false`가 되어 거부된다. guard는 이 경우를 일찍 끝내는 방어 코드다.
+- M09이 이제 equivalent가 아닌 이유: 새 형식 검사는 숫자가 아닌 바이트(공백 포함)를 거부하므로 trim이 꼭 필요하다.
+
+"100%"는 여전히 **직접 고른 mutant 30개** 기준이다. 독립적인 품질 지표가 아니다.
+
+## 수정 전 실행 (`f9e211c`) 방법
 
 - 자동 mutation framework를 쓰지 않았다. 실제 코드의 결정문과 계산식에서 **손으로 고른 24개**의 결함을 대상으로 했다(C++ 21, Python 3).
 - 각 mutant는 production 파일 하나에 텍스트 치환 1개를 적용한 것이다. 저장소를 **임시 디렉터리에 복사한 뒤 그 사본에만** 적용하고, mutant마다 원래 파일로 되돌린다. 원본(`/src`)은 Docker에 **읽기 전용**으로 마운트했다. 실행이 끝나면 사본의 production 파일이 원본과 바이트 단위로 같은지 검사한다. mutant 상태는 커밋된 적이 없다.
@@ -13,7 +43,7 @@
   - **invalid**: 컴파일되지 않는다.
 - **equivalent**: 코드 검토로 동작이 바뀌지 않는다고 판단한 mutant다. 미리 표시해 두고, 실행은 하되 점수에서 뺀다. 억지로 죽이는 테스트를 만들지 않았다.
 
-## 결과 (최종 실행)
+## 수정 전 결과 (`f9e211c`)
 
 | 항목 | 값 |
 |---|---:|
@@ -87,3 +117,16 @@
 | NC-6 | (참고) 알려진 UB DEF-SW-01/02 → **UBSan** | sanitizer 보고 | **검출**: `mainwindow.cpp:150 float-cast-overflow`, `:135 signed-integer-overflow` | `evidence/sanitize_known_defects.txt` |
 
 **NC-4가 실제로 바꾼 것:** 처음 설정(libFuzzer 기본 `len_control`)에서는 입력 길이 상한이 120초 동안 2,226바이트까지밖에 오르지 않았다. 그래서 8 KiB를 넘는 입력이 생성되지 않았고, 상한 제거 결함을 **검출하지 못했다**(421,471회 실행, exit 0. `evidence/negctl_fuzz_cap_removed_run1_before_len_control.txt`). 첫 10분 fuzz 실행도 같은 설정이었으므로 버퍼 상한 경로를 사실상 시험하지 못했다고 봐야 한다. 그래서 `-len_control=0`(처음부터 최대 12,000바이트)과 9 KiB seed를 추가했다. 최종 fuzz 결과는 이 설정으로 다시 실행한 값이다.
+
+### 수정 후 negative control (`dae0620`)
+
+| # | 넣은 결함 / 대상 | 기대 | 실제 결과 | Evidence |
+|---|---|---|---|---|
+| NC-1~3 | 위와 같음 (M07, M04, M19) | 테스트 실패 | **3/3 실패함** | `evidence/after_fixes/negctl_tests.json` |
+| NC-4 | 8 KiB 상한 제거 (seed 포함 / seed 없음) | fuzz oracle | **둘 다 1초 이내 O1** | `evidence/after_fixes/negctl_fuzz_cap_removed*.txt` |
+| NC-5 | 범위 밖 읽기 | ASan | **0초 검출** (heap-use-after-free) | `evidence/after_fixes/negctl_fuzz_oob_read.txt` |
+| NC-7 | RPM 상한 검사 제거 (DEF-SW-01 재발) | fuzz oracle O6 | **1초 이내 O6 위반** | `evidence/after_fixes/negctl_fuzz_bound_removed.txt` |
+| NC-8 | 숫자 형식 검사 제거 (DEF-SW-04 재발) | fuzz oracle O6 | **1초 이내 O6 위반** | `evidence/after_fixes/negctl_fuzz_format_check_removed.txt` |
+| NC-9 | 수정 전 production 코드 + 수정 후 계약 테스트 (`b18b7c3`) | 새 테스트가 결함을 잡음 | **7개 검사 XFAIL**: DEF-SW-01 2, DEF-SW-02 1, DEF-SW-04 4 (같은 실행에서 DEF-SW-03 1 XFAIL) | `evidence/after_fixes/prefix_b18b7c3_qttest_*.txt` |
+
+수정 전 fuzz oracle(O1–O5)은 DEF-SW-04를 찾지 못했다. 새 oracle O6(Qt를 쓰지 않는 독립 참조 구현)는 같은 유형의 회귀(NC-8)를 1초 안에 찾는다.

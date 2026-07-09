@@ -1,7 +1,8 @@
 # Coverage Report — Post-project Software Verification
 
 > 환경: 개발 PC + Docker(`Dockerfile.verify`: Ubuntu 20.04, Qt 5.12.8, GCC 9.3 `--coverage`, gcovr 7.2), Qt `offscreen`.
-> RUBIK Pi 3에서 실행한 결과가 아니다. 실행: `scripts/sw_verify.sh coverage`. 원본 출력: [`evidence/`](evidence/).
+> RUBIK Pi 3에서 실행한 결과가 아니다. 실행: `scripts/sw_verify.sh coverage`.
+> 원본 출력: 수정 전 [`evidence/`](evidence/), 수정 후 [`evidence/after_fixes/`](evidence/after_fixes/).
 
 ## 측정 범위
 
@@ -14,7 +15,30 @@
 
 Branch 설정: `--exclude-throw-branches --exclude-unreachable-branches`. gcov는 소스의 결정문이 아니라 **컴파일러 arc** 단위로 branch를 센다. 따라서 Qt 문자열·임시 객체 호출이 만든 arc도 분모에 들어간다.
 
-## 결과 (C++, 현재 테스트 전체: QtTest parser + QtTest MainWindow)
+## 단계별 요약 (C++, in-scope)
+
+| 단계 | Line | Function | Branch |
+|---|---:|---:|---:|
+| Before hardening (기존 테스트만, `main` 977bd2f) | 8.1% (16/198) | 10.5% (2/19) | 약 7% |
+| After hardening, 결함 수정 전 (`f9e211c`) | 97.0% (192/198) | 100.0% (19/19) | 84.4% (195/231) |
+| **After fixes (DEF-SW-01/02/04 수정 후, `dae0620`)** | **97.1% (202/208)** | **100.0% (20/20)** | **85.9% (219/255)** |
+
+수정 후 분모가 커진 이유는 production 코드가 늘었기 때문이다(`RpmParser::parseLine` 추가, 10 lines, 1 function, branch arc 24개). 수치를 유지하려고 추가한 테스트는 없다. 수정 후 늘어난 테스트는 결함 수정의 계약을 확인하는 것뿐이다(형식 계약 표, 상한, overflow).
+
+### 수정 후 모듈별 (`dae0620`)
+
+| Module | Line | Function | Branch |
+|---|---:|---:|---:|
+| RPM parser / input validation (`consume`, `parseLine`, `correct`) | 100.0% (26/26) | 100.0% (3/3) | 97.6% (41/42) |
+| Input sources (serial, replay, simulation) | 91.2% (62/68) | 100.0% (6/6) | 76.8% (76/99) |
+| Pending sample + 30 Hz UI update | 100.0% (51/51) | 100.0% (4/4) | 83.3% (30/36) |
+| State / data conversion (speed, RPM correction) | 100.0% (12/12) | 100.0% (2/2) | 80.0% (4/5) |
+| Measurement / CSV logging | 100.0% (17/17) | 100.0% (3/3) | 100.0% (7/7) |
+| Lifecycle (constructor setup, destructor) | 100.0% (34/34) | 100.0% (2/2) | 92.4% (61/66) |
+
+Python 측정 분석 coverage는 수정 전후가 같다(line 92/117, branch 27/30). Python 코드는 바꾸지 않았다.
+
+## 수정 전 결과 (`f9e211c`, C++, QtTest parser + QtTest MainWindow)
 
 | | Line | Function | Branch |
 |---|---:|---:|---:|

@@ -1,0 +1,77 @@
+QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-root'
+********* Start testing of TstMainWindow *********
+Config: Using QtTest library 5.12.8, Qt 5.12.8 (x86_64-little_endian-lp64 shared (dynamic) release build; by GCC 9.3.0)
+PASS   : TstMainWindow::initTestCase()
+QDEBUG : TstMainWindow::csvHeaderIsWrittenEvenWithoutFrames() Replaying 1 RPM samples from "/tmp/tst_mainwindow-faGpBU/replay.txt" every 3600000 ms
+PASS   : TstMainWindow::csvHeaderIsWrittenEvenWithoutFrames()
+QDEBUG : TstMainWindow::displayWorksWhenCsvCannotBeCreated() Replaying 1 RPM samples from "/tmp/tst_mainwindow-VUHZEQ/replay.txt" every 3600000 ms
+QWARN  : TstMainWindow::displayWorksWhenCsvCannotBeCreated() This plugin does not support propagateSizeHints()
+PASS   : TstMainWindow::displayWorksWhenCsvCannotBeCreated()
+QDEBUG : TstMainWindow::sampleIsShownOnlyAfterFlush() Replaying 1 RPM samples from "/tmp/tst_mainwindow-XAhEIB/replay.txt" every 3600000 ms
+PASS   : TstMainWindow::sampleIsShownOnlyAfterFlush()
+QDEBUG : TstMainWindow::flushWithoutPendingSampleChangesNothing() Replaying 1 RPM samples from "/tmp/tst_mainwindow-uggoJR/replay.txt" every 3600000 ms
+QWARN  : TstMainWindow::flushWithoutPendingSampleChangesNothing() This plugin does not support propagateSizeHints()
+PASS   : TstMainWindow::flushWithoutPendingSampleChangesNothing()
+QDEBUG : TstMainWindow::onlyLatestPendingSampleIsShownAndLogged() Replaying 3 RPM samples from "/tmp/tst_mainwindow-enGvFi/replay.txt" every 3600000 ms
+QWARN  : TstMainWindow::onlyLatestPendingSampleIsShownAndLogged() This plugin does not support propagateSizeHints()
+PASS   : TstMainWindow::onlyLatestPendingSampleIsShownAndLogged()
+QDEBUG : TstMainWindow::negativeSampleIsDisplayedAsZeroAndRawIsLogged() Replaying 2 RPM samples from "/tmp/tst_mainwindow-PFWRVC/replay.txt" every 3600000 ms
+QWARN  : TstMainWindow::negativeSampleIsDisplayedAsZeroAndRawIsLogged() This plugin does not support propagateSizeHints()
+PASS   : TstMainWindow::negativeSampleIsDisplayedAsZeroAndRawIsLogged()
+QDEBUG : TstMainWindow::eachFrameIsLoggedOnceAfterPaint() Replaying 2 RPM samples from "/tmp/tst_mainwindow-gTjAsv/replay.txt" every 3600000 ms
+QWARN  : TstMainWindow::eachFrameIsLoggedOnceAfterPaint() This plugin does not support propagateSizeHints()
+PASS   : TstMainWindow::eachFrameIsLoggedOnceAfterPaint()
+QDEBUG : TstMainWindow::paintBeforeFirstSampleIsNotLogged() Replaying 1 RPM samples from "/tmp/tst_mainwindow-sTBkyu/replay.txt" every 3600000 ms
+QWARN  : TstMainWindow::paintBeforeFirstSampleIsNotLogged() This plugin does not support propagateSizeHints()
+PASS   : TstMainWindow::paintBeforeFirstSampleIsNotLogged()
+QDEBUG : TstMainWindow::speedIsDerivedFromDisplayedRpm() Replaying 2 RPM samples from "/tmp/tst_mainwindow-JMTqim/replay.txt" every 3600000 ms
+PASS   : TstMainWindow::speedIsDerivedFromDisplayedRpm()
+QDEBUG : TstMainWindow::animation(delta 4: below kSmallDelta, set directly) Replaying 1 RPM samples from "/tmp/tst_mainwindow-fpaPGc/replay.txt" every 3600000 ms
+PASS   : TstMainWindow::animation(delta 4: below kSmallDelta, set directly)
+QDEBUG : TstMainWindow::animation(delta 5: kSmallDelta, animated, clamped to 60) Replaying 1 RPM samples from "/tmp/tst_mainwindow-WxIwXg/replay.txt" every 3600000 ms
+PASS   : TstMainWindow::animation(delta 5: kSmallDelta, animated, clamped to 60)
+QDEBUG : TstMainWindow::animation(delta 45: 2*delta = 90 ms) Replaying 1 RPM samples from "/tmp/tst_mainwindow-jWmnLk/replay.txt" every 3600000 ms
+PASS   : TstMainWindow::animation(delta 45: 2*delta = 90 ms)
+QDEBUG : TstMainWindow::animation(delta 90: 2*delta = 180 ms (upper clamp)) Replaying 1 RPM samples from "/tmp/tst_mainwindow-NtETJV/replay.txt" every 3600000 ms
+PASS   : TstMainWindow::animation(delta 90: 2*delta = 180 ms (upper clamp))
+QDEBUG : TstMainWindow::animation(delta 1000: clamped to 180 ms) Replaying 1 RPM samples from "/tmp/tst_mainwindow-wgfghX/replay.txt" every 3600000 ms
+PASS   : TstMainWindow::animation(delta 1000: clamped to 180 ms)
+QDEBUG : TstMainWindow::animation(delta 911420367: largest accepted RPM) Replaying 1 RPM samples from "/tmp/tst_mainwindow-XPXSqn/replay.txt" every 3600000 ms
+PASS   : TstMainWindow::animation(delta 911420367: largest accepted RPM)
+QDEBUG : TstMainWindow::animationIsRestartedFromCurrentValue() Replaying 2 RPM samples from "/tmp/tst_mainwindow-ayWWZD/replay.txt" every 3600000 ms
+PASS   : TstMainWindow::animationIsRestartedFromCurrentValue()
+QDEBUG : TstMainWindow::replayUsesSerialLineProtocol() Replaying 2 RPM samples from "/tmp/tst_mainwindow-bcOGQY/replay.txt" every 3600000 ms
+QWARN  : TstMainWindow::replayUsesSerialLineProtocol() This plugin does not support propagateSizeHints()
+QDEBUG : TstMainWindow::replayUsesSerialLineProtocol() Replay finished
+PASS   : TstMainWindow::replayUsesSerialLineProtocol()
+QDEBUG : TstMainWindow::replayPlaysAtConfiguredIntervalAndStops() Replaying 2 RPM samples from "/tmp/tst_mainwindow-RzpjuP/replay.txt" every 100 ms
+QWARN  : TstMainWindow::replayPlaysAtConfiguredIntervalAndStops() This plugin does not support propagateSizeHints()
+QWARN  : TstMainWindow::replayPlaysAtConfiguredIntervalAndStops() This plugin does not support propagateSizeHints()
+QDEBUG : TstMainWindow::replayPlaysAtConfiguredIntervalAndStops() Replay finished
+PASS   : TstMainWindow::replayPlaysAtConfiguredIntervalAndStops()
+QWARN  : TstMainWindow::missingReplayFileIsReported() Cannot open CLUSTER_REPLAY_FILE: "/tmp/tst_mainwindow-CQFdwP/does-not-exist.txt"
+PASS   : TstMainWindow::missingReplayFileIsReported()
+QDEBUG : TstMainWindow::simulatedSamplesStayInGeneratorRange() Running with simulated RPM input.
+QWARN  : TstMainWindow::simulatedSamplesStayInGeneratorRange() This plugin does not support propagateSizeHints()
+PASS   : TstMainWindow::simulatedSamplesStayInGeneratorRange()
+QDEBUG : TstMainWindow::serialPathViaPseudoTerminal() Connecting to serial port: "/dev/pts/0"
+QWARN  : TstMainWindow::serialPathViaPseudoTerminal() This plugin does not support propagateSizeHints()
+QWARN  : TstMainWindow::serialPathViaPseudoTerminal() This plugin does not support propagateSizeHints()
+PASS   : TstMainWindow::serialPathViaPseudoTerminal()
+QDEBUG : TstMainWindow::unopenableSerialPortIsReported() Connecting to serial port: "/dev/rubik-no-such-port"
+QWARN  : TstMainWindow::unopenableSerialPortIsReported() Failed to open serial port: "No such file or directory"
+PASS   : TstMainWindow::unopenableSerialPortIsReported()
+QDEBUG : TstMainWindow::speedStaysRepresentableUpToRpmBound() Replaying 1 RPM samples from "/tmp/tst_mainwindow-JkupoL/replay.txt" every 3600000 ms
+QDEBUG : TstMainWindow::speedStaysRepresentableUpToRpmBound() Replay finished
+PASS   : TstMainWindow::speedStaysRepresentableUpToRpmBound()
+QDEBUG : TstMainWindow::animationDurationHasNoOverflow() Replaying 1 RPM samples from "/tmp/tst_mainwindow-BXSuUK/replay.txt" every 3600000 ms
+PASS   : TstMainWindow::animationDurationHasNoOverflow()
+QDEBUG : TstMainWindow::knownDefect_repeatedValueLoggedAtUnrelatedRepaint() Replaying 2 RPM samples from "/tmp/tst_mainwindow-gWIPgO/replay.txt" every 3600000 ms
+QWARN  : TstMainWindow::knownDefect_repeatedValueLoggedAtUnrelatedRepaint() This plugin does not support propagateSizeHints()
+QWARN  : TstMainWindow::knownDefect_repeatedValueLoggedAtUnrelatedRepaint() This plugin does not support propagateSizeHints()
+XFAIL  : TstMainWindow::knownDefect_repeatedValueLoggedAtUnrelatedRepaint() DEF-SW-03: repeated-value sample is logged at an unrelated repaint
+   Loc: [/src/tests/tst_mainwindow/tst_mainwindow.cpp(497)]
+PASS   : TstMainWindow::knownDefect_repeatedValueLoggedAtUnrelatedRepaint()
+PASS   : TstMainWindow::cleanupTestCase()
+Totals: 27 passed, 0 failed, 0 skipped, 0 blacklisted, 1838ms
+********* Finished testing of TstMainWindow *********

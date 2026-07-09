@@ -1,0 +1,11 @@
+...........                                                              [100%]
+
+---------- coverage: platform linux, python 3.8.10-final-0 -----------
+Name                          Stmts   Miss Branch BrPart  Cover   Missing
+-------------------------------------------------------------------------
+scripts/analyze_latency.py       78     23     16      2    73%   21, 31, 56-78
+scripts/validate_latency.py      39      2     14      1    94%   83-84
+-------------------------------------------------------------------------
+TOTAL                           117     25     30      3    81%
+
+11 passed in 0.32s

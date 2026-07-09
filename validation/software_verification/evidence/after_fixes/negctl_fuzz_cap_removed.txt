@@ -1,0 +1,47 @@
+INFO: Seed: 3064481325
+INFO: Loaded 1 modules   (950 inline 8-bit counters): 950 [0x5c53f8, 0x5c57ae), 
+INFO: Loaded 1 PC tables (950 PCs): 950 [0x5c57b0,0x5c9310), 
+INFO:       14 files found in /b/negctl/cap_removed/corpus
+INFO: seed corpus: files: 14 min: 3b max: 9006b total: 9425b rss: 29Mb
+#15	INITED cov: 403 ft: 1377 corp: 14/9425b exec/s: 0 rss: 31Mb
+#17	NEW    cov: 403 ft: 1458 corp: 15/9452b lim: 12000 exec/s: 0 rss: 31Mb L: 27/9006 MS: 2 ShuffleBytes-CopyPart-
+#18	NEW    cov: 403 ft: 1469 corp: 16/9523b lim: 12000 exec/s: 0 rss: 31Mb L: 71/9006 MS: 1 ShuffleBytes-
+#21	NEW    cov: 403 ft: 1471 corp: 17/9594b lim: 12000 exec/s: 0 rss: 31Mb L: 71/9006 MS: 3 ChangeASCIIInt-ShuffleBytes-CMP- DE: "\x11\x00\x00\x00"-
+#24	NEW    cov: 403 ft: 1477 corp: 18/9699b lim: 12000 exec/s: 0 rss: 31Mb L: 105/9006 MS: 3 ChangeByte-PersAutoDict-ChangeByte- DE: "\x11\x00\x00\x00"-
+#25	NEW    cov: 403 ft: 1478 corp: 19/9841b lim: 12000 exec/s: 0 rss: 31Mb L: 142/9006 MS: 1 InsertRepeatedBytes-
+#26	NEW    cov: 403 ft: 1481 corp: 20/9868b lim: 12000 exec/s: 0 rss: 31Mb L: 27/9006 MS: 1 ChangeByte-
+#28	NEW    cov: 403 ft: 1488 corp: 21/21Kb lim: 12000 exec/s: 0 rss: 31Mb L: 12000/12000 MS: 2 PersAutoDict-CrossOver- DE: "\x11\x00\x00\x00"-
+#31	NEW    cov: 403 ft: 1491 corp: 22/28Kb lim: 12000 exec/s: 0 rss: 32Mb L: 7492/12000 MS: 3 ChangeBit-ChangeBit-CrossOver-
+#32	NEW    cov: 403 ft: 1505 corp: 23/40Kb lim: 12000 exec/s: 0 rss: 32Mb L: 12000/12000 MS: 1 CrossOver-
+#37	NEW    cov: 403 ft: 1515 corp: 24/45Kb lim: 12000 exec/s: 0 rss: 33Mb L: 5532/12000 MS: 5 EraseBytes-ChangeBinInt-ChangeByte-InsertRepeatedBytes-EraseBytes-
+#38	NEW    cov: 403 ft: 1561 corp: 25/57Kb lim: 12000 exec/s: 0 rss: 33Mb L: 12000/12000 MS: 1 CrossOver-
+#41	NEW    cov: 403 ft: 1581 corp: 26/57Kb lim: 12000 exec/s: 0 rss: 33Mb L: 103/12000 MS: 3 ChangeByte-CMP-ChangeBit- DE: "\x01\x00"-
+ORACLE VIOLATION: O1 buffer above cap
+==1634== ERROR: libFuzzer: deadly signal
+    #0 0x528fc1 in __sanitizer_print_stack_trace (/b/negctl/cap_removed/fuzz+0x528fc1)
+    #1 0x474118 in fuzzer::PrintStackTrace() (/b/negctl/cap_removed/fuzz+0x474118)
+    #2 0x459263 in fuzzer::Fuzzer::CrashCallback() (/b/negctl/cap_removed/fuzz+0x459263)
+    #3 0x7ffff773641f  (/lib/x86_64-linux-gnu/libpthread.so.0+0x1441f)
+    #4 0x7ffff754600a in raise (/lib/x86_64-linux-gnu/libc.so.6+0x4300a)
+    #5 0x7ffff7525858 in abort (/lib/x86_64-linux-gnu/libc.so.6+0x22858)
+    #6 0x5530c4 in LLVMFuzzerTestOneInput /b/negctl/cap_removed/src/tests/fuzz/fuzz_rpmparser.cpp:120:9
+    #7 0x45a921 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) (/b/negctl/cap_removed/fuzz+0x45a921)
+    #8 0x45a065 in fuzzer::Fuzzer::RunOne(unsigned char const*, unsigned long, bool, fuzzer::InputInfo*, bool*) (/b/negctl/cap_removed/fuzz+0x45a065)
+    #9 0x45c307 in fuzzer::Fuzzer::MutateAndTestOne() (/b/negctl/cap_removed/fuzz+0x45c307)
+    #10 0x45d005 in fuzzer::Fuzzer::Loop(std::__Fuzzer::vector<fuzzer::SizedFile, fuzzer::fuzzer_allocator<fuzzer::SizedFile> >&) (/b/negctl/cap_removed/fuzz+0x45d005)
+    #11 0x44b9be in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) (/b/negctl/cap_removed/fuzz+0x44b9be)
+    #12 0x474802 in main (/b/negctl/cap_removed/fuzz+0x474802)
+    #13 0x7ffff7527082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+    #14 0x42075d in _start (/b/negctl/cap_removed/fuzz+0x42075d)
+
+NOTE: libFuzzer has rudimentary signal handlers.
+      Combine libFuzzer with AddressSanitizer or similar for better crash reports.
+SUMMARY: libFuzzer: deadly signal
+MS: 2 ChangeASCIIInt-CrossOver-; base unit: ce7145ca283d86608746b27aac90955045710157
+artifact_prefix='/b/negctl/cap_removed/'; Test unit written to /b/negctl/cap_removed/crash-c11e5f853e254694c9201cc41a8b38f500dd7c99
+--- injected: sed 's/buffer.remove(0, buffer.size() - maxBufferBytes);/;/' rpmparser.h
+53c53
+<         buffer.remove(0, buffer.size() - maxBufferBytes);
+---
+>         ;
+--- fuzzer exit code: 77 after 0 s (limit 120 s)

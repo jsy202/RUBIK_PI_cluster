@@ -1,0 +1,83 @@
+{
+  "summary": {
+    "total": 3,
+    "killed": 3,
+    "survived": 0,
+    "equivalent": 0,
+    "invalid": 0,
+    "score": "3/3 = 100.0%"
+  },
+  "mutants": [
+    {
+      "id": "M04",
+      "file": "rpmparser.h",
+      "original": "if (line.size() > maxLineLen) continue;",
+      "mutant": "if (line.size() >= maxLineLen) continue;",
+      "fault": "line-length boundary > -> >= (64-byte line rejected)",
+      "status": "killed",
+      "detail": "qttest-parser: exit 1",
+      "tests": [
+        "FAIL!  : TstRpmParser::lineAtMaxLengthIsAcceptedLongerIsSkipped()"
+      ]
+    },
+    {
+      "id": "M07",
+      "file": "rpmparser.h",
+      "original": "if (!parseLine(line, rawRpm)) continue;",
+      "mutant": "parseLine(line, rawRpm);",
+      "fault": "invalid-input rejection removed (failed parse appended)",
+      "status": "killed",
+      "detail": "qttest-parser: exit 33",
+      "tests": [
+        "FAIL!  : TstMainWindow::replayPlaysAtConfiguredIntervalAndStops()",
+        "FAIL!  : TstMainWindow::replayUsesSerialLineProtocol()",
+        "FAIL!  : TstMainWindow::speedStaysRepresentableUpToRpmBound()",
+        "FAIL!  : TstRpmParser::emptyAndWhitespaceLinesAreSkipped()",
+        "FAIL!  : TstRpmParser::extractedParserMatchesBaselineInlineCode()",
+        "FAIL!  : TstRpmParser::intBoundaries()",
+        "FAIL!  : TstRpmParser::invalidStringsAreSkipped()",
+        "FAIL!  : TstRpmParser::nulAcrossReadBoundaryIsRejected()",
+        "FAIL!  : TstRpmParser::overflowIsSkipped()",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(NUL inside digits)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(NUL then letters)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(NUL-only line between frames)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(bare CR is not a separator (both values lost))",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(bound: INT_MAX)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(bound: one above)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(garbage: decimal point)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(garbage: exponent)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(garbage: hex)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(garbage: letters)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(garbage: separator)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(garbage: space then letters)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(high bytes rejected)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(inner space rejected)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(leading NUL)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(only newlines)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(overflow: 20 digits)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(overflow: INT_MAX + 1)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(overflow: INT_MIN",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(sign: minus alone)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(sign: plus alone)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(sign: space after sign)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(sign: trailing sign)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(sign: two signs)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(trailing NUL)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(value then garbage then value)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(ws: whitespace-only line)"
+      ]
+    },
+    {
+      "id": "M19",
+      "file": "mainwindow.cpp",
+      "original": "qint64 dt_sp = (t_paint - t_serial);",
+      "mutant": "qint64 dt_sp = (t_serial - t_paint);",
+      "fault": "latency sign inverted in CSV",
+      "status": "killed",
+      "detail": "qttest-mainwindow: exit 1",
+      "tests": [
+        "FAIL!  : TstMainWindow::eachFrameIsLoggedOnceAfterPaint()"
+      ]
+    }
+  ]
+}

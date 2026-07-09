@@ -1,0 +1,2 @@
+kernel: 6.8.0-138-generic  vm.mmap_rnd_bits: 32
+ASan/UBSan parser test, 20 runs each: without setarch -R failed 6/20, with setarch -R failed 0/20

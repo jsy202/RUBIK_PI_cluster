@@ -40,7 +40,7 @@
 | pending 대기 | 샘플은 다음 flush까지 0~33 ms 대기하고, 이 시간은 **E2E에 포함된다** | 설계 의도(과도한 UI 갱신 방지) |
 | 샘플 덮어쓰기 | flush 사이에 여러 샘플이 들어오면 마지막 샘플만 표시하고 로그로 남긴다. **덮어쓰인 샘플은 표시도, 로깅도 되지 않는다** | CSV `seq`의 공백으로 개수를 계산할 수 있다 |
 | 같은 값 반복 | 표시 값이 그대로면 `setText`가 호출되지 않아 paint가 없고, **그 샘플은 로그로 남지 않는다** | 정속 구간의 로그 수가 줄어든다 |
-| 다른 원인의 repaint | 로그 가드(`m_frameSeq != m_lastLoggedSeq`)는 flush 뒤 첫 paint 1회만 기록한다. 아직 로그되지 않은 seq에 대해 다른 원인(expose 등)으로 repaint가 일어나면, 그 시점이 `t_frame`으로 기록될 수 있다 | 과대 측정 가능성(B, 미재현) |
+| 다른 원인의 repaint | 로그 가드(`m_frameSeq != m_lastLoggedSeq`)는 flush 뒤 첫 paint 1회만 기록한다. 아직 로그되지 않은 seq에 대해 다른 원인(expose 등)으로 repaint가 일어나면, 그 시점이 `t_frame`으로 기록될 수 있다 | **Known Measurement Limitation DEF-SW-03**: host 환경에서 재현함(A, `tst_mainwindow::knownDefect_repeatedValueLoggedAtUnrelatedRepaint`). 연구 결과(10.38 ms / 21 ms)에 대한 영향은 원본 CSV가 없어 판단할 수 없다. 수정하지 않음 |
 | `CLUSTER_ANIMATE` | 켜면 중간값이 먼저 그려지므로 `t_frame`은 목표값이 아니라 첫 중간값이 그려진 시점이 된다 | README도 측정 시 끄기를 권장한다 |
 | 시간 해상도 | `QElapsedTimer::elapsed()`는 ms 정수 → 1 ms 양자화, 0 ms 가능 | – |
 | 시계 | 같은 프로세스 안의 단조 시계 1개. 시계 동기화 오차는 없다 | – |
