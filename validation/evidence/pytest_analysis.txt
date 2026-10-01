@@ -1,0 +1,10 @@
+# python3 -m pytest -v, 2026-10-01T22:52:49+09:00, code at fdbd44e
+tests/analysis/test_latency_analysis.py::test_percentile_matches_linear_interpolation PASSED
+tests/analysis/test_latency_analysis.py::test_existing_jitter_definition_is_population_stddev PASSED
+tests/analysis/test_latency_analysis.py::test_summary_statistics_and_budget PASSED
+tests/analysis/test_latency_analysis.py::test_verdict_fails_when_p95_exceeds_budget PASSED
+tests/analysis/test_latency_analysis.py::test_seq_gaps_count_samples_not_logged PASSED
+tests/analysis/test_latency_analysis.py::test_cli_exit_codes PASSED     
+tests/analysis/test_latency_analysis.py::test_missing_columns_is_input_error PASSED
+tests/analysis/test_latency_analysis.py::test_existing_analyze_script_runs_on_valid_csv PASSED
+============================== 8 passed in 0.79s ===============================

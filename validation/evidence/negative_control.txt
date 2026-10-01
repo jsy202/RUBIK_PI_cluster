@@ -1,0 +1,9 @@
+# Negative control (mutations applied to rpmparser.h inside the test container), 2026-10-01
+== mutation: remove .trimmed()  -> EQUIVALENT mutant (Qt5 QString::toInt ignores surrounding whitespace)
+Totals: 18 passed, 0 failed, 0 skipped, 0 blacklisted, 0ms
+== mutation: s/line.size() > maxLineLen/line.size() >= maxLineLen/
+FAIL!  : TstRpmParser::lineAtMaxLengthIsAcceptedLongerIsSkipped() Compared values are not the same
+Totals: 17 passed, 1 failed, 0 skipped, 0 blacklisted, 0ms
+== mutation: s/buffer.remove(0, buffer.size() - maxBufferBytes);/;/
+FAIL!  : TstRpmParser::extractedParserMatchesBaselineInlineCode() Compared values are not the same
+Totals: 17 passed, 1 failed, 0 skipped, 0 blacklisted, 0ms

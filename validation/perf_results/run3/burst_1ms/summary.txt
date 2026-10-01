@@ -1,0 +1,18 @@
+samples_logged: 968
+seq_first: 24
+seq_last: 29853
+samples_accepted_in_range: 29830
+samples_not_logged: 28862
+mean_ms: 1.008
+median_ms: 1.000
+p95_ms: 2.000
+p99_ms: 2.000
+min_ms: 0.000
+max_ms: 3.000
+jitter_stddev_ms: 0.837
+budget_ms: 33.300
+budget_exceed_count: 0
+budget_exceed_ratio: 0.000
+criterion: p95 <= 33.3 ms
+criterion_value_ms: 2.000
+verdict: PASS

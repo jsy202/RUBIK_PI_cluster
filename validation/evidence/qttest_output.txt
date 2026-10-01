@@ -1,0 +1,23 @@
+# docker run --rm rubik-cluster-test:validation  (Ubuntu 20.04, Qt 5.12.8, GCC 9.3), 2026-10-01, code at fdbd44e
+********* Start testing of TstRpmParser *********
+Config: Using QtTest library 5.12.8, Qt 5.12.8 (x86_64-little_endian-lp64 shared (dynamic) release build; by GCC 9.3.0)
+PASS   : TstRpmParser::initTestCase()
+PASS   : TstRpmParser::normalValue()
+PASS   : TstRpmParser::zero()
+PASS   : TstRpmParser::negativeIsParsedThenClampedToZero()
+PASS   : TstRpmParser::intBoundaries()
+PASS   : TstRpmParser::overflowIsSkipped()
+PASS   : TstRpmParser::invalidStringsAreSkipped()
+PASS   : TstRpmParser::emptyAndWhitespaceLinesAreSkipped()
+PASS   : TstRpmParser::crlfAndSurroundingSpacesAreTolerated()
+PASS   : TstRpmParser::splitFrameAcrossReads()
+PASS   : TstRpmParser::multipleFramesInOneRead()
+PASS   : TstRpmParser::repeatedValuesAreAllReturned()
+PASS   : TstRpmParser::rapidChangesKeepOrder()
+PASS   : TstRpmParser::lineAtMaxLengthIsAcceptedLongerIsSkipped()
+PASS   : TstRpmParser::unterminatedTailIsKeptForNextRead()
+PASS   : TstRpmParser::bufferOverflowDropsOldestBytes()
+PASS   : TstRpmParser::extractedParserMatchesBaselineInlineCode()
+PASS   : TstRpmParser::cleanupTestCase()
+Totals: 18 passed, 0 failed, 0 skipped, 0 blacklisted, 0ms
+********* Finished testing of TstRpmParser *********

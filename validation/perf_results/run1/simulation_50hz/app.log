@@ -1,0 +1,4 @@
+QStandardPaths: wrong ownership on runtime directory /tmp, 0 instead of 1000
+Running with simulated RPM input.
+This plugin does not support propagateSizeHints()
+This plugin does not support propagateSizeHints()
