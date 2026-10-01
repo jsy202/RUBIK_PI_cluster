@@ -1,0 +1,5 @@
+QStandardPaths: wrong ownership on runtime directory /tmp, 0 instead of 1000
+Replaying 454 RPM samples from "/inputs/ramp_33ms_454.txt" every 33 ms
+This plugin does not support propagateSizeHints()
+This plugin does not support propagateSizeHints()
+Replay finished
