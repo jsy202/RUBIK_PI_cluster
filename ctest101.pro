@@ -9,6 +9,7 @@ SOURCES += \
 
 HEADERS  += \
     mainwindow.h \
+    rpmparser.h \
     timestamplabel.h
 
 FORMS    += \
