@@ -1,0 +1,12 @@
+# Test image: same toolchain as the build stage of ./Dockerfile (Ubuntu 20.04 + Qt 5).
+# Builds the application (compile check) and the parser unit tests, then runs the tests.
+FROM ubuntu:20.04
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y \
+    build-essential qtbase5-dev qt5-qmake qtbase5-dev-tools libqt5serialport5-dev \
+    && rm -rf /var/lib/apt/lists/*
+WORKDIR /src
+COPY . /src
+RUN mkdir -p /build/app && cd /build/app && qmake /src/ctest101.pro && make -j"$(nproc)" \
+ && mkdir -p /build/tests && cd /build/tests && qmake /src/tests/tst_rpmparser/tst_rpmparser.pro && make -j"$(nproc)"
+CMD ["/build/tests/tst_rpmparser", "-o", "-,txt"]
