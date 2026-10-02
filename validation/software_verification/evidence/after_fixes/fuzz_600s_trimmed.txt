@@ -1,0 +1,80 @@
+# trimmed copy of the after-fix run (scripts/sw_verify.sh fuzz 600, commit dae0620); 3534 lines originally
+INFO: Seed: 3070602785
+INFO: Loaded 1 modules   (954 inline 8-bit counters): 954 [0x5c5418, 0x5c57d2), 
+INFO: Loaded 1 PC tables (954 PCs): 954 [0x5c57d8,0x5c9378), 
+INFO:       14 files found in /b/fuzz/corpus
+INFO: seed corpus: files: 14 min: 3b max: 9006b total: 9425b rss: 30Mb
+#15	INITED cov: 406 ft: 1383 corp: 14/9425b exec/s: 0 rss: 32Mb
+#511839	DONE   cov: 410 ft: 2261 corp: 240/610Kb lim: 12000 exec/s: 851 rss: 511Mb
+###### Recommended dictionary. ######
+"\xb55\x01\x00@`\x00\x00" # Uses: 410
+"\x01\x00\x00\x00\x00\x00\x00\x17" # Uses: 408
+"\xff\xff\xff\x00" # Uses: 418
+"\x01\x04" # Uses: 449
+"\xfe\xff\xff\xff" # Uses: 454
+"\x0e\x00\x00\x00\x00\x00\x00\x00" # Uses: 389
+" \xff\xff\xff\xff\xff\xff\xff" # Uses: 417
+"\xb2u\x04\x00@`\x00\x00" # Uses: 406
+"\x09\x00" # Uses: 397
+"<\x00" # Uses: 409
+"\xb8~\x02\x00\x80`\x00\x00" # Uses: 408
+"\x00\x00\x00\x00\x00\x00\x00\xe9" # Uses: 384
+"\x00\x14" # Uses: 428
+"\xad\x00\x00\x00" # Uses: 409
+"\xb8\x0ca\x00``\x00\x00" # Uses: 370
+"\x08\x00\x00\x00" # Uses: 379
+"\xff\xff\xff\xff" # Uses: 395
+"\\\x00\x00\x00\x00\x00\x00\x00" # Uses: 385
+"\x00\x00\x00\x01" # Uses: 411
+"\xd0+S6" # Uses: 351
+"\x00\x00aP\x00\x93\\\x0c" # Uses: 370
+"\x93\x00\x00\x00" # Uses: 343
+"\xff\xff\xff\x03" # Uses: 411
+"\x00\x00\x00\x00\x00\x00\x00\x00" # Uses: 348
+")j\xb8\x010`\x00\x00" # Uses: 348
+"\x1b \xed\x00\xd0a\x00\x00" # Uses: 378
+"\x01\x00" # Uses: 363
+"\x1c\xd7\x81\x020`\x00\x00" # Uses: 387
+"\x01\x01" # Uses: 336
+"\x00\x00\x00\x00" # Uses: 359
+"\xff\x07" # Uses: 344
+"\xff\xff\xff\xff\xff\xff\xff\x04" # Uses: 371
+"\xff0" # Uses: 391
+"\xff\xff\xff\xff\xff\xff\xff\xeb" # Uses: 314
+"\xd8\x09\xaf\x000`\x00\x00" # Uses: 356
+"\x01\x00\x00\x00\x00\x00\x00!" # Uses: 350
+"\x01\x00\x00\x95" # Uses: 336
+"\xff\xff\xff\xff\xff\xff\xff\x17" # Uses: 351
+"\x01\x00\x00\x00\x00\x00\x00\x02" # Uses: 331
+"M\x00\x00\x00" # Uses: 331
+"b\x00\x00\x00" # Uses: 356
+"x\x00" # Uses: 357
+"\x00\x00\x00P" # Uses: 344
+"\xff\xff\xff\xff\xff\xff\xff\xf9" # Uses: 304
+"\x01\x00\x00\x00" # Uses: 355
+"\x00\x00`0\x03\xdey{" # Uses: 369
+"\x94\x00\x00\x00" # Uses: 317
+"z\x00\x00\x00" # Uses: 338
+"\xff\xff\xff\xff\xff\xff\xff@" # Uses: 348
+"\xff\xff_\xc0\x00[\xaa\xbc" # Uses: 313
+"\x16\x00\x00\x00\x00\x00\x00\x00" # Uses: 334
+"\xff\xff\xff\xff\xff\xff\xff\xff" # Uses: 285
+... (progress lines omitted; first and last 5 kept)
+#16	NEW    cov: 406 ft: 1385 corp: 15/9496b lim: 12000 exec/s: 0 rss: 32Mb L: 71/9006 MS: 1 ChangeBit-
+#21	NEW    cov: 406 ft: 1390 corp: 16/20Kb lim: 12000 exec/s: 0 rss: 32Mb L: 12000/12000 MS: 5 EraseBytes-InsertRepeatedBytes-EraseBytes-CopyPart-CrossOver-
+#24	NEW    cov: 406 ft: 1425 corp: 17/32Kb lim: 12000 exec/s: 0 rss: 33Mb L: 12000/12000 MS: 3 ChangeBit-ShuffleBytes-CopyPart-
+#26	REDUCE cov: 406 ft: 1425 corp: 17/31Kb lim: 12000 exec/s: 0 rss: 33Mb L: 11185/12000 MS: 2 CopyPart-EraseBytes-
+#27	NEW    cov: 406 ft: 1427 corp: 18/32Kb lim: 12000 exec/s: 0 rss: 33Mb L: 189/12000 MS: 1 InsertRepeatedBytes-
+...
+#510486	REDUCE cov: 410 ft: 2261 corp: 240/610Kb lim: 12000 exec/s: 852 rss: 510Mb L: 8886/11762 MS: 2 InsertRepeatedBytes-EraseBytes-
+#510587	REDUCE cov: 410 ft: 2261 corp: 240/610Kb lim: 12000 exec/s: 852 rss: 511Mb L: 229/11762 MS: 1 EraseBytes-
+#511516	REDUCE cov: 410 ft: 2261 corp: 240/610Kb lim: 12000 exec/s: 852 rss: 511Mb L: 2625/11762 MS: 4 ChangeByte-ChangeBinInt-ChangeBinInt-EraseBytes-
+#511733	REDUCE cov: 410 ft: 2261 corp: 240/610Kb lim: 12000 exec/s: 852 rss: 511Mb L: 1000/11762 MS: 2 ChangeByte-EraseBytes-
+#511824	REDUCE cov: 410 ft: 2261 corp: 240/610Kb lim: 12000 exec/s: 853 rss: 511Mb L: 320/11762 MS: 1 EraseBytes-
+Done 511839 runs in 601 second(s)
+stat::number_of_executed_units: 511839
+stat::average_exec_per_sec:     851
+stat::new_units_added:          3314
+stat::slowest_unit_time_sec:    0
+stat::peak_rss_mb:              511
+fuzz exit code: 0

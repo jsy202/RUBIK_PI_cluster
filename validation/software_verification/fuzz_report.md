@@ -11,10 +11,31 @@
 | 대상 아님 | MainWindow, Qt event loop, QSerialPort, 드라이버, UART, 보드 |
 | harness | [`tests/fuzz/fuzz_rpmparser.cpp`](../../tests/fuzz/fuzz_rpmparser.cpp). 첫 바이트로 입력을 1~4개의 read로 나누고, 나머지를 시리얼 바이트 스트림으로 쓴다. production 코드는 바꾸지 않았다 |
 | 방법 | **libFuzzer + AddressSanitizer + UndefinedBehaviorSanitizer** (`-fsanitize=fuzzer,address,undefined,float-cast-overflow -fno-sanitize-recover=all`), LeakSanitizer 켬, `-max_len=12000 -len_control=0` |
-| oracle (위반 시 `abort()`) | O1: 호출 후 버퍼에 `\n`이 없고 크기 ≤ 8 KiB. O2: 반환 값 수 ≤ 줄 수. O3: research-baseline 원래 루프와 출력·버퍼가 같다(차등). O4: 8 KiB 이하일 때 read 분할과 무관하게 결과가 같다. O5: `correct()` ≥ 0이고 음수가 아닌 값은 유지한다 |
+| oracle (위반 시 `abort()`) | O1: 호출 후 버퍼에 `\n`이 없고 크기 ≤ 8 KiB. O2: 반환 값 수 ≤ 줄 수. O3: research-baseline 원래 루프와 버퍼가 같고 출력이 같다(수정 후에는 출력이 그 부분열). O4: 8 KiB 이하일 때 read 분할과 무관하게 결과가 같다. O5: `correct()` ≥ 0이고 음수가 아닌 값은 유지한다. O6(수정 후 추가): Qt를 쓰지 않는 독립 참조 구현과 출력·버퍼가 같다 |
 | seed corpus | [`tests/fuzz/corpus/`](../../tests/fuzz/corpus/) 14개. 요청된 입력군을 포함한다: 0, 일반 RPM, INT 경계, 반복 값, 0↔8000 급변, 빈 줄/공백, 영문, 숫자+영문, 음수, int overflow, 100자리 줄, partial frame, CR/CRLF/CRCRLF, NUL·상위 바이트, 9 KiB 무종결 입력 |
 
-## 결과 (최종 실행: `scripts/sw_verify.sh fuzz 600`)
+## 결함 수정 후 재실행 (`dae0620`) — 최신
+
+parser 수정(DEF-SW-01 상한, DEF-SW-04 형식 검사) 뒤에 같은 조건으로 다시 실행했다. 같은 조건이란 600 s, 단일 프로세스, `-max_len=12000 -len_control=0`, 같은 seed 14개, 같은 sanitizer 플래그다. 달라진 것은 oracle뿐이다. O3를 "baseline 출력의 부분열"로 바꿨고(수정은 줄을 거부만 하므로), 독립 참조 구현과 비교하는 O6를 추가했다.
+
+| 항목 | 수정 전 parser (`f9e211c` harness) | **수정 후 parser (`dae0620` harness)** |
+|---|---:|---:|
+| 실행 시간 | 601 s | **601 s** |
+| executed inputs | 1,203,649 | **511,839** |
+| 평균 속도 | 2,002 exec/s | 851 exec/s |
+| crash | 0 | **0** |
+| ASan violation | 0 | **0** |
+| UBSan violation | 0 | **0** |
+| LeakSanitizer | 0 | **0** |
+| oracle violation | 0 (O1–O5) | **0 (O1–O6)** |
+
+- **두 입력 수는 서로 다른 harness의 결과다. 같은 것으로 합치거나 비교하지 않는다.** 수정 후 실행은 입력마다 O6 참조 구현과 O3 부분열 비교를 추가로 수행하고, 계측되는 코드도 늘었다(INITED cov 199 → 406). 처리량이 낮아진 원인을 정확히 나눠 측정하지는 않았다.
+- Evidence: [`evidence/after_fixes/fuzz_600s_trimmed.txt`](evidence/after_fixes/fuzz_600s_trimmed.txt)
+- O6가 실제로 결함을 잡는지 확인했다(negative control, 수정 코드의 사본에 결함을 다시 넣음):
+  - 상한 검사 제거: 1초 이내 O6 위반
+  - 숫자 형식 검사 제거: 1초 이내 O6 위반
+
+## 수정 전 결과 (`f9e211c`: `scripts/sw_verify.sh fuzz 600`)
 
 | 항목 | 값 |
 |---|---:|
@@ -32,12 +53,12 @@ Evidence: [`evidence/fuzz_600s_trimmed.txt`](evidence/fuzz_600s_trimmed.txt) (�
 
 ## Deterministic robustness 테스트 (QtTest, 같은 입력군)
 
-`tst_rpmparser::robustnessInputClasses`는 13행, 기존 parser 테스트는 16건이다. sanitizer 빌드(ASan + UBSan, GCC 9)로도 실행했고 **위반은 0건**이다([`evidence/sanitize_parser.txt`](evidence/sanitize_parser.txt)).
+`tst_rpmparser::robustnessInputClasses`는 수정 전 13행, 수정 후 37행이다. 기존 parser 테스트는 16건이다. sanitizer 빌드(ASan + UBSan, GCC 9)로도 실행했고 **위반은 0건**이다([`evidence/sanitize_parser.txt`](evidence/sanitize_parser.txt)).
 
-이 표 테스트가 **실제 결함 1건을 찾았다**(fuzzer는 찾지 못했다):
+수정 전에는 이 표 테스트가 **실제 결함 1건을 찾았다**(fuzzer는 찾지 못했다). 지금은 수정됐다(`0262f29`):
 
-- **DEF-SW-04**: Qt 5.12.8의 `QString::toInt()`는 문자열 안의 NUL에서 파싱을 멈춘다. 그래서 `"7\0abc\n"`은 7로, `"25\0" "00\n"`은 25로 **수용된다.** 반면 `"12a\n"`은 거부된다. REQ-IN-002와 어긋나며, `QEXPECT_FAIL`로 고정했고 수정하지 않았다.
-- fuzzer가 이 결함을 찾지 못한 이유: oracle이 "baseline과 같은가"(O3)와 구조 불변식만 확인한다. 값이 맞는지는 보지 않는다. baseline 루프도 같은 `toInt`를 쓰므로 차등 검사로는 드러나지 않는다.
+- **DEF-SW-04**: Qt 5.12.8의 `QString::toInt()`는 문자열 안의 NUL에서 파싱을 멈춘다. 그래서 `"7\0abc\n"`은 7로, `"25\0" "00\n"`은 25로 **수용된다.** 반면 `"12a\n"`은 거부된다. REQ-IN-002와 어긋난다. 수정 후에는 줄 전체가 `[+|-]숫자`인지 확인하므로 거부된다. 공백·부호·꼬리 garbage·빈 입력·overflow·읽기 경계를 포함한 37행 계약 표와 읽기 경계 테스트가 모두 PASS다.
+- 수정 전 fuzzer가 이 결함을 찾지 못한 이유: oracle이 "baseline과 같은가"(O3)와 구조 불변식만 확인했다. 값이 맞는지는 보지 않았다. baseline 루프도 같은 `toInt`를 쓰므로 차등 검사로는 드러나지 않는다. 그래서 O6(독립 참조 구현)를 추가했다.
 
 같은 표가 기록한 기존 동작(결함으로 분류하지 않음): bare CR(`"2500\r3000\n"`)은 줄 구분자가 아니라서 두 값이 모두 버려진다. README에 적힌 프로토콜(줄마다 `\n`)과는 맞는다.
 
@@ -58,5 +79,5 @@ CI(`sw-verify` job)는 같은 harness로 **60초 smoke**만 실행한다. 10분 
 
 - 단일 프로세스로 10분만 돌렸다. 장시간 실행이나 분산 fuzzing은 하지 않았다.
 - 값의 정확성은 oracle이 정의한 범위(baseline 동일성, 분할 불변성, 보정 규칙)까지만 본다.
-- MainWindow 이후의 경로(UI 갱신, 속도 변환)는 fuzz 대상이 아니다. 그 경로의 UB(DEF-SW-01/02)는 경계값 테스트와 UBSan으로 찾았다.
+- MainWindow 이후의 경로(UI 갱신, 속도 변환)는 fuzz 대상이 아니다. 그 경로의 UB(DEF-SW-01/02)는 경계값 테스트와 UBSan으로 찾았고, 수정 후 strict UBSan 실행에서 위반이 0건임을 확인했다.
 - ASan 런타임 초기화 문제 때문에 `setarch -R`(ASLR 끔)로 실행했다(`limitations.md`).

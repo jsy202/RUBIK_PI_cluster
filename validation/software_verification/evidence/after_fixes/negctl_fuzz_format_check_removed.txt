@@ -1,0 +1,37 @@
+INFO: Seed: 3068157101
+INFO: Loaded 1 modules   (949 inline 8-bit counters): 949 [0x5c5418, 0x5c57cd), 
+INFO: Loaded 1 PC tables (949 PCs): 949 [0x5c57d0,0x5c9320), 
+INFO:       14 files found in /b/negctl/format_check_removed/corpus
+INFO: seed corpus: files: 14 min: 3b max: 9006b total: 9425b rss: 29Mb
+ORACLE VIOLATION: O6 differs from independent reference
+==1680== ERROR: libFuzzer: deadly signal
+    #0 0x528fc1 in __sanitizer_print_stack_trace (/b/negctl/format_check_removed/fuzz+0x528fc1)
+    #1 0x474118 in fuzzer::PrintStackTrace() (/b/negctl/format_check_removed/fuzz+0x474118)
+    #2 0x459263 in fuzzer::Fuzzer::CrashCallback() (/b/negctl/format_check_removed/fuzz+0x459263)
+    #3 0x7ffff773641f  (/lib/x86_64-linux-gnu/libpthread.so.0+0x1441f)
+    #4 0x7ffff754600a in raise (/lib/x86_64-linux-gnu/libc.so.6+0x4300a)
+    #5 0x7ffff7525858 in abort (/lib/x86_64-linux-gnu/libc.so.6+0x22858)
+    #6 0x553120 in LLVMFuzzerTestOneInput /b/negctl/format_check_removed/src/tests/fuzz/fuzz_rpmparser.cpp:124:9
+    #7 0x45a921 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) (/b/negctl/format_check_removed/fuzz+0x45a921)
+    #8 0x45a065 in fuzzer::Fuzzer::RunOne(unsigned char const*, unsigned long, bool, fuzzer::InputInfo*, bool*) (/b/negctl/format_check_removed/fuzz+0x45a065)
+    #9 0x45c987 in fuzzer::Fuzzer::ReadAndExecuteSeedCorpora(std::__Fuzzer::vector<fuzzer::SizedFile, fuzzer::fuzzer_allocator<fuzzer::SizedFile> >&) (/b/negctl/format_check_removed/fuzz+0x45c987)
+    #10 0x45cce9 in fuzzer::Fuzzer::Loop(std::__Fuzzer::vector<fuzzer::SizedFile, fuzzer::fuzzer_allocator<fuzzer::SizedFile> >&) (/b/negctl/format_check_removed/fuzz+0x45cce9)
+    #11 0x44b9be in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) (/b/negctl/format_check_removed/fuzz+0x44b9be)
+    #12 0x474802 in main (/b/negctl/format_check_removed/fuzz+0x474802)
+    #13 0x7ffff7527082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+    #14 0x42075d in _start (/b/negctl/format_check_removed/fuzz+0x42075d)
+
+NOTE: libFuzzer has rudimentary signal handlers.
+      Combine libFuzzer with AddressSanitizer or similar for better crash reports.
+SUMMARY: libFuzzer: deadly signal
+MS: 0 ; base unit: 0000000000000000000000000000000000000000
+0x1,0x32,0x35,0x0,0x30,0x30,0xa,0xff,0xfe,0xa,0x37,0xa,
+\x0125\x0000\x0a\xff\xfe\x0a7\x0a
+artifact_prefix='/b/negctl/format_check_removed/'; Test unit written to /b/negctl/format_check_removed/crash-5ac7ce1b8933555d2e8923544823004d60479ba6
+Base64: ATI1ADAwCv/+CjcK
+--- injected: sed 's/if (t.at(i) < '0' || t.at(i) > '9')/if (false)/' rpmparser.h
+39c39
+<         if (t.at(i) < '0' || t.at(i) > '9')
+---
+>         if (false)
+--- fuzzer exit code: 77 after 0 s (limit 120 s)

@@ -1,0 +1,84 @@
+INFO: Seed: 3069378684
+INFO: Loaded 1 modules   (957 inline 8-bit counters): 957 [0x5c5438, 0x5c57f5), 
+INFO: Loaded 1 PC tables (957 PCs): 957 [0x5c57f8,0x5c93c8), 
+INFO:       14 files found in /b/negctl/oob_read/corpus
+INFO: seed corpus: files: 14 min: 3b max: 9006b total: 9425b rss: 29Mb
+=================================================================
+==1695==ERROR: AddressSanitizer: heap-use-after-free on address 0x6030000006a3 at pc 0x0000004beaa7 bp 0x7fffffffdf70 sp 0x7fffffffd730
+READ of size 70 at 0x6030000006a3 thread T0
+    #0 0x4beaa6 in memcpy (/b/negctl/oob_read/fuzz+0x4beaa6)
+    #1 0x7ffff7960257 in QByteArray::QByteArray(char const*, int) (/lib/x86_64-linux-gnu/libQt5Core.so.5+0xcc257)
+    #2 0x553973 in RpmParser::consume(QByteArray&, QByteArray const&, int, int) /b/negctl/oob_read/src/rpmparser.h:57:20
+    #3 0x5528b1 in LLVMFuzzerTestOneInput /b/negctl/oob_read/src/tests/fuzz/fuzz_rpmparser.cpp:118:34
+    #4 0x45a921 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) (/b/negctl/oob_read/fuzz+0x45a921)
+    #5 0x45a065 in fuzzer::Fuzzer::RunOne(unsigned char const*, unsigned long, bool, fuzzer::InputInfo*, bool*) (/b/negctl/oob_read/fuzz+0x45a065)
+    #6 0x45c987 in fuzzer::Fuzzer::ReadAndExecuteSeedCorpora(std::__Fuzzer::vector<fuzzer::SizedFile, fuzzer::fuzzer_allocator<fuzzer::SizedFile> >&) (/b/negctl/oob_read/fuzz+0x45c987)
+    #7 0x45cce9 in fuzzer::Fuzzer::Loop(std::__Fuzzer::vector<fuzzer::SizedFile, fuzzer::fuzzer_allocator<fuzzer::SizedFile> >&) (/b/negctl/oob_read/fuzz+0x45cce9)
+    #8 0x44b9be in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) (/b/negctl/oob_read/fuzz+0x44b9be)
+    #9 0x474802 in main (/b/negctl/oob_read/fuzz+0x474802)
+    #10 0x7ffff7527082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+    #11 0x42075d in _start (/b/negctl/oob_read/fuzz+0x42075d)
+
+0x6030000006c0 is located 0 bytes to the right of 32-byte region [0x6030000006a0,0x6030000006c0)
+freed by thread T0 here:
+    #0 0x52020d in free (/b/negctl/oob_read/fuzz+0x52020d)
+    #1 0x456e6a in fuzzer::GetSizedFilesFromDir(std::__Fuzzer::basic_string<char, std::__Fuzzer::char_traits<char>, std::__Fuzzer::allocator<char> > const&, std::__Fuzzer::vector<fuzzer::SizedFile, fuzzer::fuzzer_allocator<fuzzer::SizedFile> >*) (/b/negctl/oob_read/fuzz+0x456e6a)
+    #2 0x44bdec in fuzzer::ReadCorpora(std::__Fuzzer::vector<std::__Fuzzer::basic_string<char, std::__Fuzzer::char_traits<char>, std::__Fuzzer::allocator<char> >, fuzzer::fuzzer_allocator<std::__Fuzzer::basic_string<char, std::__Fuzzer::char_traits<char>, std::__Fuzzer::allocator<char> > > > const&, std::__Fuzzer::vector<std::__Fuzzer::basic_string<char, std::__Fuzzer::char_traits<char>, std::__Fuzzer::allocator<char> >, fuzzer::fuzzer_allocator<std::__Fuzzer::basic_string<char, std::__Fuzzer::char_traits<char>, std::__Fuzzer::allocator<char> > > > const&) (/b/negctl/oob_read/fuzz+0x44bdec)
+    #3 0x44b971 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) (/b/negctl/oob_read/fuzz+0x44b971)
+    #4 0x474802 in main (/b/negctl/oob_read/fuzz+0x474802)
+    #5 0x7ffff7527082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+
+previously allocated by thread T0 here:
+    #0 0x52048d in malloc (/b/negctl/oob_read/fuzz+0x52048d)
+    #1 0x434b47 in operator new(unsigned long) (/b/negctl/oob_read/fuzz+0x434b47)
+    #2 0x456e6a in fuzzer::GetSizedFilesFromDir(std::__Fuzzer::basic_string<char, std::__Fuzzer::char_traits<char>, std::__Fuzzer::allocator<char> > const&, std::__Fuzzer::vector<fuzzer::SizedFile, fuzzer::fuzzer_allocator<fuzzer::SizedFile> >*) (/b/negctl/oob_read/fuzz+0x456e6a)
+    #3 0x44bdec in fuzzer::ReadCorpora(std::__Fuzzer::vector<std::__Fuzzer::basic_string<char, std::__Fuzzer::char_traits<char>, std::__Fuzzer::allocator<char> >, fuzzer::fuzzer_allocator<std::__Fuzzer::basic_string<char, std::__Fuzzer::char_traits<char>, std::__Fuzzer::allocator<char> > > > const&, std::__Fuzzer::vector<std::__Fuzzer::basic_string<char, std::__Fuzzer::char_traits<char>, std::__Fuzzer::allocator<char> >, fuzzer::fuzzer_allocator<std::__Fuzzer::basic_string<char, std::__Fuzzer::char_traits<char>, std::__Fuzzer::allocator<char> > > > const&) (/b/negctl/oob_read/fuzz+0x44bdec)
+    #4 0x44b971 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) (/b/negctl/oob_read/fuzz+0x44b971)
+    #5 0x474802 in main (/b/negctl/oob_read/fuzz+0x474802)
+    #6 0x7ffff7527082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+
+SUMMARY: AddressSanitizer: heap-use-after-free (/b/negctl/oob_read/fuzz+0x4beaa6) in memcpy
+Shadow bytes around the buggy address:
+  0x0c067fff8080: fd fd fd fd fa fa fd fd fd fd fa fa fd fd fd fd
+  0x0c067fff8090: fa fa fd fd fd fd fa fa fd fd fd fd fa fa fd fd
+  0x0c067fff80a0: fd fd fa fa fd fd fd fd fa fa fd fd fd fd fa fa
+  0x0c067fff80b0: fd fd fd fd fa fa fd fd fd fd fa fa fd fd fd fd
+  0x0c067fff80c0: fa fa fd fd fd fd fa fa fd fd fd fd fa fa fd fd
+=>0x0c067fff80d0: fd fd fa fa[fd]fd fd fd fa fa 00 00 00 03 fa fa
+  0x0c067fff80e0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c067fff80f0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c067fff8100: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c067fff8110: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x0c067fff8120: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+  Shadow gap:              cc
+==1695==ABORTING
+MS: 0 ; base unit: 0000000000000000000000000000000000000000
+0x0,0x30,0xa,
+\x000\x0a
+artifact_prefix='/b/negctl/oob_read/'; Test unit written to /b/negctl/oob_read/crash-22da99f7dda2c282c0c00e9ab875b7b005d9260d
+Base64: ADAK
+--- injected: sed 's/QByteArray line = buffer.left(nl);/QByteArray line(buffer.constData() + nl - 70, 70);/' rpmparser.h
+57c57
+<         QByteArray line = buffer.left(nl);
+---
+>         QByteArray line(buffer.constData() + nl - 70, 70);
+--- fuzzer exit code: 1 after 0 s (limit 120 s)

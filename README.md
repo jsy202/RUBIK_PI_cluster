@@ -40,22 +40,26 @@ RPM 수신 이후 Qt 렌더링 완료까지 1,000회 측정한 결과 평균 10.
 코드 기준의 상세 정의: [validation/measurement_boundary.md](validation/measurement_boundary.md)
 
 ## Post-project Software Verification (2026-10, 연구 종료 후)
-이 후속 작업은 새로운 하드웨어 성능 수치를 주장하려는 것이 아니다. **RUBIK Pi 3 하드웨어 없이**, 기존 실제 하드웨어 연구 이후 host 기반 환경(개발 PC + Docker, Qt offscreen)에서 SW 입력 처리와 회귀시험의 검증 범위를 넓힌 것이다. 연구 당시 코드는 tag [`research-baseline`](https://github.com/jsy202/RUBIK_PI_cluster/tree/research-baseline) (`4d4e3f8`)에 있다.
+> 보조 섹션이다. 위 Historical Research Result를 다시 측정하거나 대체하지 않는다. **RUBIK Pi 3 하드웨어 없이**, 개발 PC + Docker(Qt offscreen)에서 수행했다. 연구 당시 코드는 tag [`research-baseline`](https://github.com/jsy202/RUBIK_PI_cluster/tree/research-baseline) (`4d4e3f8`)에 있다.
 
-- **Serial/RPM parser test:** 시리얼 파싱 로직을 동작 그대로 `rpmparser.h`로 옮겼다. 원래 `readSerialData` 루프와의 차등 테스트를 포함한 QtTest를 작성했다.
-- **Measurement boundary 명확화:** `t_in`과 `t_frame`이 코드에서 정확히 어느 시점인지, 무엇이 측정에 포함되고 무엇이 빠지는지를 문서화했다(위 표).
-- **Replay 가능한 regression 환경:** 선택 입력 `CLUSTER_REPLAY_FILE`(기본 비활성)과 PASS/FAIL 분석기 `scripts/validate_latency.py`를 추가했다.
-- **Coverage / mutation / fuzz (validation-sw-hardening):** production 코드는 바꾸지 않고, MainWindow의 30 Hz 갱신·CSV 계측·속도 변환을 offscreen QtTest로 실행했다. 그 위에 coverage, 손으로 고른 mutation, parser fuzzing을 수행했다. 그 결과 고치지 않은 결함 4건(UB 2건, 측정 의미 1건, NUL 입력 수용 1건)을 재현해 기록했다.
+기존 실제 하드웨어 연구 이후, host 환경에서 직접 작성한 C++ application logic(parser, 30 Hz 갱신, 속도 변환, CSV 계측)의 SW 검증 범위를 coverage, mutation, fuzz testing으로 확장했다.
 
 | 항목 (host, PC/Docker) | 결과 |
 |---|---|
-| Code coverage (C++ app logic, gcov) | line 97.0% · function 100% · branch 84.4% (기존 테스트만: line 8.1%) |
-| Requirement coverage | SW requirement 17개 중 17개가 test와 연결됨 (하드웨어 의존 2개는 *Not revalidated*) |
-| Mutation (손으로 고른 24개) | 21 killed / 0 survived / 3 equivalent (테스트 1건 보강 전 19/20) |
-| Fuzz (libFuzzer + ASan/UBSan, `rpmparser.h`) | 600 s, 1,203,649 inputs, crash 0, sanitizer violation 0 |
-| Tests | QtTest parser 17 함수 · MainWindow 20 함수, pytest 11 — 전부 PASS (known defect 4건은 XFAIL로 고정) |
+| Code coverage (C++ app logic, gcov) | line **8.1% → 97.1%**, branch **약 7% → 85.9%** |
+| 발견한 SW 결함 | **4건 — 3건 수정, 1건은 측정 한계로 유지** (아래) |
+| Parser fuzzing (libFuzzer + ASan/UBSan, 수정 후) | 600 s, 511,839 inputs, crash 0, sanitizer violation 0 |
+| Sanitizer (ASan + UBSan, 전체 QtTest) | 수정 전 UB 2건 검출 → 수정 후 0건 |
 
-자세한 내용: [coverage](validation/software_verification/coverage_report.md) · [traceability](validation/software_verification/requirements_traceability.md) · [mutation](validation/software_verification/mutation_report.md) · [fuzz](validation/software_verification/fuzz_report.md) · [limitations](validation/software_verification/limitations.md) · 이전 정리: [requirements](validation/requirements.md) · [test cases](validation/test_cases.md) · [limitations](validation/limitations.md)
+| 결함 | 내용 | 상태 |
+|---|---|---|
+| DEF-SW-01 | RPM 상한이 없어서 속도의 int 변환이 UB가 됨 | 수정: 속도 공식과 int 타입이 허용하는 최대 RPM(911,420,367) 초과 입력은 거부 |
+| DEF-SW-02 | 애니메이션 시간 `delta * 2` int overflow | 수정: 정상 동작이 같은 overflow-free 계산 |
+| DEF-SW-04 | Qt 5.12에서 `"7\0abc"`가 7로 수용됨 | 수정: 한 줄 전체가 `[+\|-]숫자`인지 검증 |
+| DEF-SW-03 | 같은 값 샘플 뒤 관계없는 repaint 시점이 `t_frame`으로 기록될 수 있음 | **Known Measurement Limitation** — 재현은 됐지만 연구 당시 측정 의미와 관련되어 수정하지 않음. 원본 CSV가 없어 연구 결과에 대한 영향은 판단할 수 없음 |
+
+결함 수정(`rpmparser.h`, `mainwindow.cpp` 일부)은 연구 이후의 변경이다. RUBIK Pi에서 다시 실행하지 않았다.
+자세한 내용: [coverage](validation/software_verification/coverage_report.md) · [traceability](validation/software_verification/requirements_traceability.md) · [mutation](validation/software_verification/mutation_report.md) · [fuzz](validation/software_verification/fuzz_report.md) · [limitations](validation/software_verification/limitations.md)
 
 ### How to Run Tests (하드웨어 불필요)
 ```bash

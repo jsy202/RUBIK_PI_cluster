@@ -1,0 +1,568 @@
+{
+  "summary": {
+    "total": 30,
+    "killed": 27,
+    "survived": 0,
+    "equivalent": 3,
+    "invalid": 0,
+    "score": "27/27 = 100.0%"
+  },
+  "mutants": [
+    {
+      "id": "M01",
+      "file": "rpmparser.h",
+      "original": "if (buffer.size() > maxBufferBytes)",
+      "mutant": "if (buffer.size() >= maxBufferBytes)",
+      "fault": "buffer cap comparison > -> >=",
+      "status": "equivalent (survived)",
+      "detail": "",
+      "tests": []
+    },
+    {
+      "id": "M02",
+      "file": "rpmparser.h",
+      "original": "buffer.remove(0, buffer.size() - maxBufferBytes);",
+      "mutant": ";",
+      "fault": "buffer cap (8 KiB) removed: unbounded buffer",
+      "status": "killed",
+      "detail": "qttest-parser: exit 1",
+      "tests": [
+        "FAIL!  : TstRpmParser::extractedParserMatchesBaselineInlineCode()"
+      ]
+    },
+    {
+      "id": "M03",
+      "file": "rpmparser.h",
+      "original": "buffer.remove(0, buffer.size() - maxBufferBytes);",
+      "mutant": "buffer.truncate(maxBufferBytes);",
+      "fault": "overflow policy: drop newest instead of oldest bytes",
+      "status": "killed",
+      "detail": "qttest-parser: exit 3",
+      "tests": [
+        "FAIL!  : TstRpmParser::bufferOverflowDropsOldestBytes() 'buf.isEmpty()' returned FALSE. ()",
+        "FAIL!  : TstRpmParser::extractedParserMatchesBaselineInlineCode()",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(10 000-digit line skipped)"
+      ]
+    },
+    {
+      "id": "M04",
+      "file": "rpmparser.h",
+      "original": "if (line.size() > maxLineLen) continue;",
+      "mutant": "if (line.size() >= maxLineLen) continue;",
+      "fault": "line-length boundary > -> >= (64-byte line rejected)",
+      "status": "killed",
+      "detail": "qttest-parser: exit 1",
+      "tests": [
+        "FAIL!  : TstRpmParser::lineAtMaxLengthIsAcceptedLongerIsSkipped()"
+      ]
+    },
+    {
+      "id": "M05",
+      "file": "rpmparser.h",
+      "original": "if (line.size() > maxLineLen) continue;",
+      "mutant": "<deleted>",
+      "fault": "line-length check removed",
+      "status": "killed",
+      "detail": "qttest-parser: exit 1",
+      "tests": [
+        "FAIL!  : TstRpmParser::lineAtMaxLengthIsAcceptedLongerIsSkipped()"
+      ]
+    },
+    {
+      "id": "M06",
+      "file": "rpmparser.h",
+      "original": "if (!parseLine(line, rawRpm)) continue;",
+      "mutant": "if (parseLine(line, rawRpm)) continue;",
+      "fault": "parse success/failure condition inverted",
+      "status": "killed",
+      "detail": "qttest-parser: exit 54",
+      "tests": [
+        "FAIL!  : TstMainWindow::animation(delta 1000: clamped to 180 ms)",
+        "FAIL!  : TstMainWindow::animation(delta 45: 2*delta = 90 ms)",
+        "FAIL!  : TstMainWindow::animation(delta 4: below kSmallDelta, set directly)",
+        "FAIL!  : TstMainWindow::animation(delta 5: kSmallDelta, animated, clamped to 60)",
+        "FAIL!  : TstMainWindow::animation(delta 90: 2*delta = 180 ms (upper clamp))",
+        "FAIL!  : TstMainWindow::animation(delta 911420367: largest accepted RPM)",
+        "FAIL!  : TstMainWindow::animationIsRestartedFromCurrentValue()",
+        "FAIL!  : TstMainWindow::displayWorksWhenCsvCannotBeCreated()",
+        "FAIL!  : TstMainWindow::eachFrameIsLoggedOnceAfterPaint()",
+        "FAIL!  : TstMainWindow::flushWithoutPendingSampleChangesNothing()",
+        "FAIL!  : TstMainWindow::negativeSampleIsDisplayedAsZeroAndRawIsLogged()",
+        "FAIL!  : TstMainWindow::onlyLatestPendingSampleIsShownAndLogged()",
+        "FAIL!  : TstMainWindow::replayPlaysAtConfiguredIntervalAndStops()",
+        "FAIL!  : TstMainWindow::replayUsesSerialLineProtocol()",
+        "FAIL!  : TstMainWindow::sampleIsShownOnlyAfterFlush()",
+        "FAIL!  : TstMainWindow::serialPathViaPseudoTerminal()",
+        "FAIL!  : TstMainWindow::speedIsDerivedFromDisplayedRpm()",
+        "FAIL!  : TstMainWindow::speedStaysRepresentableUpToRpmBound()",
+        "FAIL!  : TstRpmParser::bufferOverflowDropsOldestBytes()",
+        "FAIL!  : TstRpmParser::crlfAndSurroundingSpacesAreTolerated()",
+        "FAIL!  : TstRpmParser::emptyAndWhitespaceLinesAreSkipped()",
+        "FAIL!  : TstRpmParser::extractedParserMatchesBaselineInlineCode()",
+        "FAIL!  : TstRpmParser::intBoundaries()",
+        "FAIL!  : TstRpmParser::invalidStringsAreSkipped()",
+        "FAIL!  : TstRpmParser::lineAtMaxLengthIsAcceptedLongerIsSkipped()",
+        "FAIL!  : TstRpmParser::multipleFramesInOneRead()",
+        "FAIL!  : TstRpmParser::negativeIsParsedThenClampedToZero()",
+        "FAIL!  : TstRpmParser::normalValue()",
+        "FAIL!  : TstRpmParser::nulAcrossReadBoundaryIsRejected()",
+        "FAIL!  : TstRpmParser::overflowIsSkipped()",
+        "FAIL!  : TstRpmParser::rapidChangesKeepOrder()",
+        "FAIL!  : TstRpmParser::repeatedValuesAreAllReturned()",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(10 000-digit line skipped)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(CR CR LF)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(NUL inside digits)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(NUL then letters)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(NUL-only line between frames)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(bare CR is not a separator (both values lost))",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(bound: INT_MAX)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(bound: INT_MIN still accepted (clamped later))",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(bound: largest speed-safe RPM)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(bound: one above)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(explicit plus sign)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(garbage: decimal point)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(garbage: exponent)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(garbage: hex)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(garbage: letters)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(garbage: separator)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(garbage: space then letters)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(high bytes rejected)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(inner space rejected)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(leading NUL)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(leading zeros)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(minus zero)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(only newlines)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(overflow: 20 digits)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(overflow: INT_MAX + 1)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(overflow: INT_MIN",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(sign: minus alone)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(sign: plus alone)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(sign: space after sign)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(sign: trailing sign)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(sign: two signs)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(trailing NUL)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(value then garbage then value)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(ws: VT and FF around)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(ws: spaces around)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(ws: tab, CR around negative)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(ws: whitespace-only line)",
+        "FAIL!  : TstRpmParser::splitFrameAcrossReads()",
+        "FAIL!  : TstRpmParser::unterminatedTailIsKeptForNextRead()",
+        "FAIL!  : TstRpmParser::zero()",
+        "XPASS  : TstMainWindow::knownDefect_repeatedValueLoggedAtUnrelatedRepaint() QCOMPARE(dataRows().size(), 1) returned TRUE unexpectedly."
+      ]
+    },
+    {
+      "id": "M07",
+      "file": "rpmparser.h",
+      "original": "if (!parseLine(line, rawRpm)) continue;",
+      "mutant": "parseLine(line, rawRpm);",
+      "fault": "invalid-input rejection removed (failed parse appended)",
+      "status": "killed",
+      "detail": "qttest-parser: exit 33",
+      "tests": [
+        "FAIL!  : TstMainWindow::replayPlaysAtConfiguredIntervalAndStops()",
+        "FAIL!  : TstMainWindow::replayUsesSerialLineProtocol()",
+        "FAIL!  : TstMainWindow::speedStaysRepresentableUpToRpmBound()",
+        "FAIL!  : TstRpmParser::emptyAndWhitespaceLinesAreSkipped()",
+        "FAIL!  : TstRpmParser::extractedParserMatchesBaselineInlineCode()",
+        "FAIL!  : TstRpmParser::intBoundaries()",
+        "FAIL!  : TstRpmParser::invalidStringsAreSkipped()",
+        "FAIL!  : TstRpmParser::nulAcrossReadBoundaryIsRejected()",
+        "FAIL!  : TstRpmParser::overflowIsSkipped()",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(NUL inside digits)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(NUL then letters)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(NUL-only line between frames)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(bare CR is not a separator (both values lost))",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(bound: INT_MAX)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(bound: one above)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(garbage: decimal point)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(garbage: exponent)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(garbage: hex)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(garbage: letters)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(garbage: separator)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(garbage: space then letters)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(high bytes rejected)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(inner space rejected)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(leading NUL)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(only newlines)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(overflow: 20 digits)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(overflow: INT_MAX + 1)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(overflow: INT_MIN",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(sign: minus alone)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(sign: plus alone)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(sign: space after sign)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(sign: trailing sign)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(sign: two signs)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(trailing NUL)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(value then garbage then value)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(ws: whitespace-only line)"
+      ]
+    },
+    {
+      "id": "M08",
+      "file": "rpmparser.h",
+      "original": "buffer.remove(0, nl + 1);",
+      "mutant": "buffer.remove(0, nl);",
+      "fault": "off-by-one: line terminator not consumed",
+      "status": "killed",
+      "detail": "qttest-parser: timeout (60s)",
+      "tests": [
+        "qttest-mainwindow: TIMEOUT",
+        "qttest-parser: TIMEOUT"
+      ]
+    },
+    {
+      "id": "M09",
+      "file": "rpmparser.h",
+      "original": "const QByteArray t = line.trimmed();",
+      "mutant": "const QByteArray t = line;",
+      "fault": "whitespace trimming removed",
+      "status": "killed",
+      "detail": "qttest-parser: exit 7",
+      "tests": [
+        "FAIL!  : TstMainWindow::replayUsesSerialLineProtocol()",
+        "FAIL!  : TstMainWindow::serialPathViaPseudoTerminal()",
+        "FAIL!  : TstRpmParser::crlfAndSurroundingSpacesAreTolerated()",
+        "FAIL!  : TstRpmParser::extractedParserMatchesBaselineInlineCode()",
+        "FAIL!  : TstRpmParser::lineAtMaxLengthIsAcceptedLongerIsSkipped()",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(CR CR LF)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(ws: VT and FF around)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(ws: spaces around)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(ws: tab, CR around negative)"
+      ]
+    },
+    {
+      "id": "M10",
+      "file": "rpmparser.h",
+      "original": "return rawRpm < 0 ? 0 : rawRpm;",
+      "mutant": "return rawRpm <= 0 ? 0 : rawRpm;",
+      "fault": "negative clamp boundary < -> <=",
+      "status": "equivalent (survived)",
+      "detail": "",
+      "tests": []
+    },
+    {
+      "id": "M11",
+      "file": "rpmparser.h",
+      "original": "return rawRpm < 0 ? 0 : rawRpm;",
+      "mutant": "return rawRpm;",
+      "fault": "negative RPM clamp removed",
+      "status": "killed",
+      "detail": "qttest-parser: exit 1",
+      "tests": [
+        "FAIL!  : TstMainWindow::negativeSampleIsDisplayedAsZeroAndRawIsLogged()",
+        "FAIL!  : TstMainWindow::replayUsesSerialLineProtocol()",
+        "FAIL!  : TstMainWindow::serialPathViaPseudoTerminal()",
+        "FAIL!  : TstRpmParser::negativeIsParsedThenClampedToZero()"
+      ]
+    },
+    {
+      "id": "N01",
+      "file": "rpmparser.h",
+      "original": "if (t.at(i) < '0' || t.at(i) > '9')",
+      "mutant": "if (false)",
+      "fault": "digit-format check removed (DEF-SW-04 regression)",
+      "status": "killed",
+      "detail": "qttest-parser: exit 4",
+      "tests": [
+        "FAIL!  : TstRpmParser::nulAcrossReadBoundaryIsRejected()",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(NUL inside digits)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(NUL then letters)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(trailing NUL)"
+      ]
+    },
+    {
+      "id": "N02",
+      "file": "rpmparser.h",
+      "original": "t.at(i) > '9'",
+      "mutant": "t.at(i) >= '9'",
+      "fault": "digit range boundary > '9' -> >= '9'",
+      "status": "killed",
+      "detail": "qttest-parser: exit 4",
+      "tests": [
+        "FAIL!  : TstMainWindow::animation(delta 90: 2*delta = 180 ms (upper clamp))",
+        "FAIL!  : TstMainWindow::animation(delta 911420367: largest accepted RPM)",
+        "FAIL!  : TstMainWindow::speedStaysRepresentableUpToRpmBound()",
+        "FAIL!  : TstRpmParser::crlfAndSurroundingSpacesAreTolerated()",
+        "FAIL!  : TstRpmParser::intBoundaries()",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(bound: largest speed-safe RPM)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(inner space rejected)"
+      ]
+    },
+    {
+      "id": "N03",
+      "file": "rpmparser.h",
+      "original": "(t.at(0) == '+' || t.at(0) == '-')",
+      "mutant": "(t.at(0) == '-')",
+      "fault": "explicit plus sign no longer accepted",
+      "status": "killed",
+      "detail": "qttest-parser: exit 2",
+      "tests": [
+        "FAIL!  : TstRpmParser::extractedParserMatchesBaselineInlineCode()",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(explicit plus sign)"
+      ]
+    },
+    {
+      "id": "N04",
+      "file": "rpmparser.h",
+      "original": "return false;                                   // empty, or a sign alone",
+      "mutant": ";",
+      "fault": "empty / sign-only guard removed",
+      "status": "equivalent (survived)",
+      "detail": "",
+      "tests": []
+    },
+    {
+      "id": "N05",
+      "file": "rpmparser.h",
+      "original": "return ok && value <= kMaxRpm;",
+      "mutant": "return ok && value < kMaxRpm;",
+      "fault": "RPM bound boundary <= -> <",
+      "status": "killed",
+      "detail": "qttest-parser: exit 2",
+      "tests": [
+        "FAIL!  : TstMainWindow::animation(delta 911420367: largest accepted RPM)",
+        "FAIL!  : TstMainWindow::speedStaysRepresentableUpToRpmBound()",
+        "FAIL!  : TstRpmParser::intBoundaries()",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(bound: largest speed-safe RPM)"
+      ]
+    },
+    {
+      "id": "N06",
+      "file": "rpmparser.h",
+      "original": "return ok && value <= kMaxRpm;",
+      "mutant": "return ok;",
+      "fault": "RPM upper bound removed (DEF-SW-01 regression)",
+      "status": "killed",
+      "detail": "qttest-parser: exit 3",
+      "tests": [
+        "FAIL!  : TstMainWindow::speedStaysRepresentableUpToRpmBound()",
+        "FAIL!  : TstRpmParser::intBoundaries()",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(bound: INT_MAX)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(bound: one above)"
+      ]
+    },
+    {
+      "id": "M12",
+      "file": "mainwindow.cpp",
+      "original": "if (m_pendingRpm < 0) return;",
+      "mutant": "<deleted>",
+      "fault": "flush without pending sample not ignored",
+      "status": "killed",
+      "detail": "qttest-mainwindow: exit 9",
+      "tests": [
+        "FAIL!  : TstMainWindow::animation(delta 1000: clamped to 180 ms)",
+        "FAIL!  : TstMainWindow::animation(delta 45: 2*delta = 90 ms)",
+        "FAIL!  : TstMainWindow::animation(delta 5: kSmallDelta, animated, clamped to 60)",
+        "FAIL!  : TstMainWindow::animation(delta 90: 2*delta = 180 ms (upper clamp))",
+        "FAIL!  : TstMainWindow::animation(delta 911420367: largest accepted RPM)",
+        "FAIL!  : TstMainWindow::flushWithoutPendingSampleChangesNothing()",
+        "FAIL!  : TstMainWindow::replayPlaysAtConfiguredIntervalAndStops()",
+        "FAIL!  : TstMainWindow::speedStaysRepresentableUpToRpmBound()",
+        "XPASS  : TstMainWindow::knownDefect_repeatedValueLoggedAtUnrelatedRepaint() QCOMPARE(dataRows().size(), 1) returned TRUE unexpectedly."
+      ]
+    },
+    {
+      "id": "M13",
+      "file": "mainwindow.cpp",
+      "original": "m_pendingRpm = finalRpm;",
+      "mutant": "<deleted>",
+      "fault": "accepted sample value not stored (update skipped)",
+      "status": "killed",
+      "detail": "qttest-mainwindow: exit 21",
+      "tests": [
+        "FAIL!  : TstMainWindow::animation(delta 1000: clamped to 180 ms)",
+        "FAIL!  : TstMainWindow::animation(delta 45: 2*delta = 90 ms)",
+        "FAIL!  : TstMainWindow::animation(delta 4: below kSmallDelta, set directly)",
+        "FAIL!  : TstMainWindow::animation(delta 5: kSmallDelta, animated, clamped to 60)",
+        "FAIL!  : TstMainWindow::animation(delta 90: 2*delta = 180 ms (upper clamp))",
+        "FAIL!  : TstMainWindow::animation(delta 911420367: largest accepted RPM)",
+        "FAIL!  : TstMainWindow::animationDurationHasNoOverflow()",
+        "FAIL!  : TstMainWindow::animationIsRestartedFromCurrentValue()",
+        "FAIL!  : TstMainWindow::displayWorksWhenCsvCannotBeCreated()",
+        "FAIL!  : TstMainWindow::eachFrameIsLoggedOnceAfterPaint()",
+        "FAIL!  : TstMainWindow::flushWithoutPendingSampleChangesNothing()",
+        "FAIL!  : TstMainWindow::knownDefect_repeatedValueLoggedAtUnrelatedRepaint()",
+        "FAIL!  : TstMainWindow::negativeSampleIsDisplayedAsZeroAndRawIsLogged()",
+        "FAIL!  : TstMainWindow::onlyLatestPendingSampleIsShownAndLogged()",
+        "FAIL!  : TstMainWindow::replayPlaysAtConfiguredIntervalAndStops()",
+        "FAIL!  : TstMainWindow::replayUsesSerialLineProtocol()",
+        "FAIL!  : TstMainWindow::sampleIsShownOnlyAfterFlush()",
+        "FAIL!  : TstMainWindow::serialPathViaPseudoTerminal()",
+        "FAIL!  : TstMainWindow::simulatedSamplesStayInGeneratorRange() 'w.displayRpm() >= 740 && w.displayRpm() <= 4260' returned FALSE. (0)",
+        "FAIL!  : TstMainWindow::speedIsDerivedFromDisplayedRpm()",
+        "FAIL!  : TstMainWindow::speedStaysRepresentableUpToRpmBound()"
+      ]
+    },
+    {
+      "id": "M14",
+      "file": "mainwindow.cpp",
+      "original": "m_displayRpm = rpm;",
+      "mutant": ";",
+      "fault": "displayed-state update skipped",
+      "status": "killed",
+      "detail": "qttest-mainwindow: exit 14",
+      "tests": [
+        "FAIL!  : TstMainWindow::animation(delta 1000: clamped to 180 ms)",
+        "FAIL!  : TstMainWindow::animation(delta 45: 2*delta = 90 ms)",
+        "FAIL!  : TstMainWindow::animation(delta 4: below kSmallDelta, set directly)",
+        "FAIL!  : TstMainWindow::animation(delta 5: kSmallDelta, animated, clamped to 60)",
+        "FAIL!  : TstMainWindow::animation(delta 90: 2*delta = 180 ms (upper clamp))",
+        "FAIL!  : TstMainWindow::animation(delta 911420367: largest accepted RPM)",
+        "FAIL!  : TstMainWindow::animationDurationHasNoOverflow()",
+        "FAIL!  : TstMainWindow::animationIsRestartedFromCurrentValue()",
+        "FAIL!  : TstMainWindow::negativeSampleIsDisplayedAsZeroAndRawIsLogged()",
+        "FAIL!  : TstMainWindow::sampleIsShownOnlyAfterFlush()",
+        "FAIL!  : TstMainWindow::serialPathViaPseudoTerminal()",
+        "FAIL!  : TstMainWindow::simulatedSamplesStayInGeneratorRange() 'w.displayRpm() >= 740 && w.displayRpm() <= 4260' returned FALSE. (0)",
+        "FAIL!  : TstMainWindow::speedIsDerivedFromDisplayedRpm()",
+        "FAIL!  : TstMainWindow::speedStaysRepresentableUpToRpmBound()"
+      ]
+    },
+    {
+      "id": "M15",
+      "file": "mainwindow.cpp",
+      "original": "if (m_frameSeq <= 0 || m_frameSeq == m_lastLoggedSeq)",
+      "mutant": "if (m_frameSeq <= 0)",
+      "fault": "per-frame log de-duplication removed",
+      "status": "killed",
+      "detail": "qttest-mainwindow: exit 3",
+      "tests": [
+        "FAIL!  : TstMainWindow::eachFrameIsLoggedOnceAfterPaint()",
+        "FAIL!  : TstMainWindow::flushWithoutPendingSampleChangesNothing()",
+        "FAIL!  : TstMainWindow::replayUsesSerialLineProtocol()"
+      ]
+    },
+    {
+      "id": "M16",
+      "file": "mainwindow.cpp",
+      "original": "if (delta < kSmallDelta) {",
+      "mutant": "if (delta <= kSmallDelta) {",
+      "fault": "animation threshold boundary < -> <=",
+      "status": "killed",
+      "detail": "qttest-mainwindow: exit 1",
+      "tests": [
+        "FAIL!  : TstMainWindow::animation(delta 5: kSmallDelta, animated, clamped to 60)"
+      ]
+    },
+    {
+      "id": "M17",
+      "file": "mainwindow.cpp",
+      "original": "int(2 * std::clamp<qint64>(delta, 30, 90))",
+      "mutant": "int(std::clamp<qint64>(delta, 30, 90))",
+      "fault": "animation duration conversion changed",
+      "status": "killed",
+      "detail": "qttest-mainwindow: exit 6",
+      "tests": [
+        "FAIL!  : TstMainWindow::animation(delta 1000: clamped to 180 ms)",
+        "FAIL!  : TstMainWindow::animation(delta 45: 2*delta = 90 ms)",
+        "FAIL!  : TstMainWindow::animation(delta 5: kSmallDelta, animated, clamped to 60)",
+        "FAIL!  : TstMainWindow::animation(delta 90: 2*delta = 180 ms (upper clamp))",
+        "FAIL!  : TstMainWindow::animation(delta 911420367: largest accepted RPM)",
+        "FAIL!  : TstMainWindow::animationDurationHasNoOverflow()"
+      ]
+    },
+    {
+      "id": "M18",
+      "file": "mainwindow.cpp",
+      "original": "currentRpm * (4.5 / 2.5)",
+      "mutant": "currentRpm * (2.5 / 4.5)",
+      "fault": "speed conversion ratio inverted",
+      "status": "killed",
+      "detail": "qttest-mainwindow: exit 2",
+      "tests": [
+        "FAIL!  : TstMainWindow::speedIsDerivedFromDisplayedRpm()",
+        "FAIL!  : TstMainWindow::speedStaysRepresentableUpToRpmBound()"
+      ]
+    },
+    {
+      "id": "M19",
+      "file": "mainwindow.cpp",
+      "original": "qint64 dt_sp = (t_paint - t_serial);",
+      "mutant": "qint64 dt_sp = (t_serial - t_paint);",
+      "fault": "latency sign inverted in CSV",
+      "status": "killed",
+      "detail": "qttest-mainwindow: exit 1",
+      "tests": [
+        "FAIL!  : TstMainWindow::eachFrameIsLoggedOnceAfterPaint()"
+      ]
+    },
+    {
+      "id": "M20",
+      "file": "mainwindow.cpp",
+      "original": "m_seq++;",
+      "mutant": "<deleted>",
+      "fault": "sample sequence number not incremented",
+      "status": "killed",
+      "detail": "qttest-mainwindow: exit 9",
+      "tests": [
+        "FAIL!  : TstMainWindow::eachFrameIsLoggedOnceAfterPaint()",
+        "FAIL!  : TstMainWindow::flushWithoutPendingSampleChangesNothing()",
+        "FAIL!  : TstMainWindow::knownDefect_repeatedValueLoggedAtUnrelatedRepaint()",
+        "FAIL!  : TstMainWindow::negativeSampleIsDisplayedAsZeroAndRawIsLogged()",
+        "FAIL!  : TstMainWindow::onlyLatestPendingSampleIsShownAndLogged()",
+        "FAIL!  : TstMainWindow::replayPlaysAtConfiguredIntervalAndStops()",
+        "FAIL!  : TstMainWindow::replayUsesSerialLineProtocol()",
+        "FAIL!  : TstMainWindow::serialPathViaPseudoTerminal()",
+        "FAIL!  : TstMainWindow::simulatedSamplesStayInGeneratorRange() '!rows.isEmpty()' returned FALSE. ()"
+      ]
+    },
+    {
+      "id": "M21",
+      "file": "mainwindow.cpp",
+      "original": "if (m_replayIndex >= m_replaySamples.size())",
+      "mutant": "if (m_replayIndex > m_replaySamples.size())",
+      "fault": "replay end-of-input boundary >= -> >",
+      "status": "killed",
+      "detail": "qttest-mainwindow: exit 3",
+      "tests": [
+        "FAIL!  : TstMainWindow::replayPlaysAtConfiguredIntervalAndStops()",
+        "FAIL!  : TstMainWindow::replayUsesSerialLineProtocol()",
+        "FAIL!  : TstMainWindow::speedStaysRepresentableUpToRpmBound()"
+      ]
+    },
+    {
+      "id": "P01",
+      "file": "scripts/validate_latency.py",
+      "original": "stats[\"criterion_value_ms\"] <= budget_ms",
+      "mutant": "stats[\"criterion_value_ms\"] < budget_ms",
+      "fault": "PASS/FAIL verdict boundary <= -> <",
+      "status": "killed",
+      "detail": "pytest: exit 1",
+      "tests": [
+        "FAILED tests/analysis/test_latency_analysis.py::test_verdict_boundary_p95_equal_to_budget_passes"
+      ]
+    },
+    {
+      "id": "P02",
+      "file": "scripts/validate_latency.py",
+      "original": "max(0, b - a - 1)",
+      "mutant": "max(0, b - a)",
+      "fault": "not-logged sample count off by one",
+      "status": "killed",
+      "detail": "pytest: exit 1",
+      "tests": [
+        "FAILED tests/analysis/test_latency_analysis.py::test_seq_gaps_count_samples_not_logged"
+      ]
+    },
+    {
+      "id": "P03",
+      "file": "scripts/analyze_latency.py",
+      "original": "rank = (len(ordered) - 1) * pct / 100.0",
+      "mutant": "rank = len(ordered) * pct / 100.0",
+      "fault": "percentile rank formula changed",
+      "status": "killed",
+      "detail": "pytest: exit 1",
+      "tests": [
+        "FAILED tests/analysis/test_latency_analysis.py::test_cli_exit_codes",
+        "FAILED tests/analysis/test_latency_analysis.py::test_existing_analyze_script_runs_on_valid_csv",
+        "FAILED tests/analysis/test_latency_analysis.py::test_existing_jitter_definition_is_population_stddev",
+        "FAILED tests/analysis/test_latency_analysis.py::test_percentile_matches_linear_interpolation",
+        "FAILED tests/analysis/test_latency_analysis.py::test_seq_gaps_count_samples_not_logged",
+        "FAILED tests/analysis/test_latency_analysis.py::test_summary_statistics_and_budget",
+        "FAILED tests/analysis/test_latency_analysis.py::test_verdict_boundary_p95_equal_to_budget_passes"
+      ]
+    }
+  ]
+}

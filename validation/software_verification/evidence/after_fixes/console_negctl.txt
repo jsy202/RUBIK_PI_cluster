@@ -1,0 +1,10 @@
+baseline: all suites pass
+M04 killed                   line-length boundary > -> >= (64-byte line rejected)  <- FAIL!  : TstRpmParser::lineAtMaxLengthIsAcceptedLongerIsSkipped()
+M07 killed                   invalid-input rejection removed (failed parse appended)  <- FAIL!  : TstMainWindow::replayPlaysAtConfiguredIntervalAndStops(), FAIL!  : TstMainWindow::replayUsesSerialLineProtocol(), FAIL!  : TstMainWindow::spe
+M19 killed                   latency sign inverted in CSV  <- FAIL!  : TstMainWindow::eachFrameIsLoggedOnceAfterPaint()
+{"total": 3, "killed": 3, "survived": 0, "equivalent": 0, "invalid": 0, "score": "3/3 = 100.0%"}
+cap_removed: exit=77 time=0s ORACLE VIOLATION: O1 buffer above cap
+cap_removed_noseed: exit=77 time=0s ORACLE VIOLATION: O1 buffer above cap
+bound_removed: exit=77 time=0s ORACLE VIOLATION: O6 differs from independent reference
+format_check_removed: exit=77 time=0s ORACLE VIOLATION: O6 differs from independent reference
+oob_read: exit=1 time=0s ERROR: AddressSanitizer: heap-use-after-free
