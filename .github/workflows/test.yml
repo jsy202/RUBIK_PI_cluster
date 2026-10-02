@@ -29,3 +29,33 @@ jobs:
           python-version: "3.10"  # only version verified locally
       - run: python -m pip install pytest
       - run: python -m pytest -v
+
+  # Post-project software verification (hardware-free): MainWindow QtTest on Qt offscreen,
+  # gcov coverage, ASan/UBSan test run and a 60 s libFuzzer smoke run on the RPM parser.
+  # Mutation testing and the 10-minute fuzz campaign stay local (scripts/sw_verify.sh mutate / fuzz 600).
+  sw-verify:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build verification image (Ubuntu 20.04, Qt 5.12, gcovr, clang-10)
+        run: docker build -f Dockerfile.verify -t rubik-verify .
+      - name: Tests, coverage, sanitizers, fuzz smoke
+        run: |
+          mkdir -p .verify-out
+          for stage in tests coverage sanitize "fuzz 60"; do
+            echo "::group::$stage"
+            # seccomp=unconfined only to allow `setarch -R` for the ASan runtime (see scripts/sw_verify.sh)
+            docker run --rm --security-opt seccomp=unconfined -v "$PWD":/src:ro -v "$PWD/.verify-out":/out \
+              rubik-verify bash /src/scripts/sw_verify.sh $stage
+            echo "::endgroup::"
+          done
+      - name: Coverage summary
+        if: always()
+        run: cat .verify-out/coverage_modules.md >> "$GITHUB_STEP_SUMMARY" || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sw-verify-results
+          path: .verify-out/
+          retention-days: 14
