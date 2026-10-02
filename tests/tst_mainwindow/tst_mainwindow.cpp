@@ -11,6 +11,7 @@
 #include <QTemporaryDir>
 #include <QSocketNotifier>
 
+#include <cmath>
 #include <cstdlib>
 #include <fcntl.h>
 #include <unistd.h>
@@ -283,6 +284,7 @@ private slots:
         QTest::newRow("delta 45: 2*delta = 90 ms") << 45 << true << 90;
         QTest::newRow("delta 90: 2*delta = 180 ms (upper clamp)") << 90 << true << 180;
         QTest::newRow("delta 1000: clamped to 180 ms") << 1000 << true << 180;
+        QTest::newRow("delta 911420367: largest accepted RPM") << 911420367 << true << 180;
     }
     void animation()
     {
@@ -430,39 +432,53 @@ private slots:
     // Each check states the expected behaviour; QEXPECT_FAIL records the current deviation, so the
     // test turns into XPASS (= failure) if the behaviour changes and the record must be updated.
 
-    // DEF-SW-01: the parser accepts any int RPM (no upper bound, REQ-IN-005), but update_values()
-    // converts rpm * 2.356 (double) back to int. For rpm > ~911 million the value is not
-    // representable: undefined behaviour (UBSan: float-cast-overflow). x86-64 yields INT_MIN.
+    // DEF-SW-01: update_values() converts rpm * 2.356... (double) back to int. Above 911420367 the
+    // result is not representable: undefined behaviour (UBSan float-cast-overflow; x86-64 shows
+    // INT_MIN). Contract: the largest speed-safe RPM is accepted and gives a valid speed; a larger
+    // input value is rejected before it reaches the display or the speed calculation.
     void knownDefect_speedOverflowForHugeRpm()
     {
         if (qEnvironmentVariableIsSet("RUBIK_SKIP_KNOWN_UB"))
             QSKIP("known UB, recorded in the separate known-defect sanitizer run");
-        EnvGuard env{{"CLUSTER_REPLAY_FILE", writeReplay("2147483647\n").toLocal8Bit()},
+        EnvGuard env{{"CLUSTER_REPLAY_FILE", writeReplay("911420367\n2147483647\n").toLocal8Bit()},
                      {"CLUSTER_REPLAY_INTERVAL_MS", QByteArray::number(kNeverMs)}};
         MainWindow w;
         feed(w);
         invoke(w, "flushPendingRpm");
-        QCOMPARE(w.displayRpm(), INT_MAX);
         invoke(w, "update_values");
-        QEXPECT_FAIL("", "DEF-SW-01: speed int conversion overflows for rpm > ~9.1e8 (UB)", Continue);
+        // same expression and evaluation order as update_values()
+        const double maxSpeed = 911420367.0 * (4.5 / 2.5) * (M_PI * 2.5) * 10.0 / 60.0;
+        QVERIFY(maxSpeed < 2147483648.0);
+        QVERIFY((911420368.0 * (4.5 / 2.5) * (M_PI * 2.5) * 10.0 / 60.0) >= 2147483648.0);
+        QCOMPARE(speedLabel(w)->text(), QString::number(static_cast<int>(maxSpeed)));
+        feed(w);                                       // 2147483647
+        invoke(w, "flushPendingRpm");
+        invoke(w, "update_values");
+        QEXPECT_FAIL("", "DEF-SW-01: value above 911420367 is accepted", Continue);
+        QCOMPARE(w.displayRpm(), 911420367);
+        QEXPECT_FAIL("", "DEF-SW-01: speed int conversion overflows (UB)", Continue);
         QVERIFY(speedLabel(w)->text().toInt() >= 0);
     }
 
     // DEF-SW-02: with CLUSTER_ANIMATE=1, delta * 2 overflows int for delta > INT_MAX/2 (UB,
-    // UBSan: signed-integer-overflow); on x86-64 it wraps negative and is clamped to 60 ms.
+    // UBSan signed-integer-overflow); on x86-64 it wraps negative and is clamped to 60 ms.
+    // The start value is set through the public displayRpm property, so the calculation is
+    // checked on its own, independent of the input bound of DEF-SW-01.
     void knownDefect_animationDurationOverflow()
     {
         if (qEnvironmentVariableIsSet("RUBIK_SKIP_KNOWN_UB"))
             QSKIP("known UB, recorded in the separate known-defect sanitizer run");
-        EnvGuard env{{"CLUSTER_REPLAY_FILE", writeReplay("2000000000\n").toLocal8Bit()},
+        EnvGuard env{{"CLUSTER_REPLAY_FILE", writeReplay("0\n").toLocal8Bit()},
                      {"CLUSTER_REPLAY_INTERVAL_MS", QByteArray::number(kNeverMs)},
                      {"CLUSTER_ANIMATE", "1"}};
         MainWindow w;
         auto *anim = w.findChild<QPropertyAnimation *>();
+        w.setDisplayRpm(2000000000);                   // delta = 2e9 > INT_MAX / 2
         feed(w);
         invoke(w, "flushPendingRpm");
         QEXPECT_FAIL("", "DEF-SW-02: delta*2 overflows, duration clamps to 60 instead of 180 (UB)", Continue);
         QCOMPARE(anim->duration(), 180);
+        QCOMPARE(anim->endValue().toInt(), 0);
     }
 
     // DEF-SW-03 (measurement semantics): a sample whose value equals the displayed value causes no
