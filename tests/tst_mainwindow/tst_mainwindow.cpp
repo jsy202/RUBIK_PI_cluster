@@ -456,14 +456,12 @@ private slots:
         QVERIFY(speedLabel(w)->text().toInt() >= 0);
     }
 
-    // DEF-SW-02: with CLUSTER_ANIMATE=1, delta * 2 overflows int for delta > INT_MAX/2 (UB,
-    // UBSan signed-integer-overflow); on x86-64 it wraps negative and is clamped to 60 ms.
+    // REQ-UI-004, DEF-SW-02 (fixed): with CLUSTER_ANIMATE=1, delta * 2 overflowed int for
+    // delta > INT_MAX/2 (UB, UBSan signed-integer-overflow; x86-64 wrapped negative -> 60 ms).
     // The start value is set through the public displayRpm property, so the calculation is
     // checked on its own, independent of the input bound of DEF-SW-01.
-    void knownDefect_animationDurationOverflow()
+    void animationDurationHasNoOverflow()
     {
-        if (qEnvironmentVariableIsSet("RUBIK_SKIP_KNOWN_UB"))
-            QSKIP("known UB, recorded in the separate known-defect sanitizer run");
         EnvGuard env{{"CLUSTER_REPLAY_FILE", writeReplay("0\n").toLocal8Bit()},
                      {"CLUSTER_REPLAY_INTERVAL_MS", QByteArray::number(kNeverMs)},
                      {"CLUSTER_ANIMATE", "1"}};
@@ -472,7 +470,6 @@ private slots:
         w.setDisplayRpm(2000000000);                   // delta = 2e9 > INT_MAX / 2
         feed(w);
         invoke(w, "flushPendingRpm");
-        QEXPECT_FAIL("", "DEF-SW-02: delta*2 overflows, duration clamps to 60 instead of 180 (UB)", Continue);
         QCOMPARE(anim->duration(), 180);
         QCOMPARE(anim->endValue().toInt(), 0);
     }

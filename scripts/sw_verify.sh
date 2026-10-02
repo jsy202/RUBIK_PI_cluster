@@ -28,8 +28,9 @@ export QT_QPA_PLATFORM=offscreen
 NORAND=(setarch "$(uname -m)" -R)
 mkdir -p "$OUT"
 
-# known-defect tests (QEXPECT_FAIL) that execute undefined behaviour on purpose (DEF-SW-02)
-KNOWN_UB_TESTS="knownDefect_animationDurationOverflow"
+# known-defect tests (QEXPECT_FAIL) that execute undefined behaviour on purpose. None since the
+# DEF-SW-01/02 fixes; the separate known-defect sanitizer run is skipped while this is empty.
+KNOWN_UB_TESTS=""
 
 qbuild() {   # qbuild <builddir> <pro> [qmake args...]
     local dir=$1 pro=$2; shift 2
@@ -80,6 +81,7 @@ stage_sanitize() {
         | tee "$OUT/sanitize_mainwindow.txt" | tail -1 || rc=1
     grep -c "runtime error\|ERROR: AddressSanitizer" "$OUT"/sanitize_parser.txt "$OUT"/sanitize_mainwindow.txt || true
     # Known defects: record the sanitizer reports they trigger (expected), without halting.
+    [ -n "$KNOWN_UB_TESTS" ] || { echo "no known-UB tests" > "$OUT/sanitize_known_defects.txt"; return $rc; }
     UBSAN_OPTIONS=print_stacktrace=0:halt_on_error=0 \
         bash -c "cd /tmp && ${NORAND[*]} /b/san/mw/tst_mainwindow $KNOWN_UB_TESTS" > "$OUT/sanitize_known_defects.txt" 2>&1 || true
     grep "runtime error" "$OUT/sanitize_known_defects.txt" || true
