@@ -1,0 +1,39 @@
+INFO: Seed: 159885577
+INFO: Loaded 1 modules   (556 inline 8-bit counters): 556 [0x5b60e8, 0x5b6314), 
+INFO: Loaded 1 PC tables (556 PCs): 556 [0x5b6318,0x5b85d8), 
+INFO:       14 files found in /b/negctl/cap_removed/corpus
+INFO: seed corpus: files: 14 min: 3b max: 9006b total: 9425b rss: 29Mb
+#15	INITED cov: 196 ft: 631 corp: 14/9425b exec/s: 0 rss: 30Mb
+#17	NEW    cov: 196 ft: 632 corp: 15/9547b lim: 12000 exec/s: 0 rss: 30Mb L: 122/9006 MS: 2 CopyPart-ShuffleBytes-
+#18	NEW    cov: 196 ft: 664 corp: 16/21Kb lim: 12000 exec/s: 0 rss: 31Mb L: 12000/12000 MS: 1 CrossOver-
+#19	NEW    cov: 196 ft: 676 corp: 17/21Kb lim: 12000 exec/s: 0 rss: 31Mb L: 53/12000 MS: 1 EraseBytes-
+#23	NEW    cov: 196 ft: 688 corp: 18/25Kb lim: 12000 exec/s: 0 rss: 31Mb L: 4343/12000 MS: 4 ChangeASCIIInt-ShuffleBytes-ChangeBinInt-CrossOver-
+ORACLE VIOLATION: O1 buffer above cap
+==1360== ERROR: libFuzzer: deadly signal
+    #0 0x527e51 in __sanitizer_print_stack_trace (/b/negctl/cap_removed/fuzz+0x527e51)
+    #1 0x472fa8 in fuzzer::PrintStackTrace() (/b/negctl/cap_removed/fuzz+0x472fa8)
+    #2 0x4580f3 in fuzzer::Fuzzer::CrashCallback() (/b/negctl/cap_removed/fuzz+0x4580f3)
+    #3 0x7ffff773641f  (/lib/x86_64-linux-gnu/libpthread.so.0+0x1441f)
+    #4 0x7ffff754600a in raise (/lib/x86_64-linux-gnu/libc.so.6+0x4300a)
+    #5 0x7ffff7525858 in abort (/lib/x86_64-linux-gnu/libc.so.6+0x22858)
+    #6 0x551ba6 in LLVMFuzzerTestOneInput /b/negctl/cap_removed/src/tests/fuzz/fuzz_rpmparser.cpp:64:9
+    #7 0x4597b1 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) (/b/negctl/cap_removed/fuzz+0x4597b1)
+    #8 0x458ef5 in fuzzer::Fuzzer::RunOne(unsigned char const*, unsigned long, bool, fuzzer::InputInfo*, bool*) (/b/negctl/cap_removed/fuzz+0x458ef5)
+    #9 0x45b197 in fuzzer::Fuzzer::MutateAndTestOne() (/b/negctl/cap_removed/fuzz+0x45b197)
+    #10 0x45be95 in fuzzer::Fuzzer::Loop(std::__Fuzzer::vector<fuzzer::SizedFile, fuzzer::fuzzer_allocator<fuzzer::SizedFile> >&) (/b/negctl/cap_removed/fuzz+0x45be95)
+    #11 0x44a84e in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) (/b/negctl/cap_removed/fuzz+0x44a84e)
+    #12 0x473692 in main (/b/negctl/cap_removed/fuzz+0x473692)
+    #13 0x7ffff7527082 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x24082)
+    #14 0x41f5ed in _start (/b/negctl/cap_removed/fuzz+0x41f5ed)
+
+NOTE: libFuzzer has rudimentary signal handlers.
+      Combine libFuzzer with AddressSanitizer or similar for better crash reports.
+SUMMARY: libFuzzer: deadly signal
+MS: 1 CrossOver-; base unit: 6226c6f784c3ed9970f42ac73644832dd669051a
+artifact_prefix='/b/negctl/cap_removed/'; Test unit written to /b/negctl/cap_removed/crash-f6a71dbdb8401a14e627ed61ffaf7a02a67ef363
+--- injected: sed 's/buffer.remove(0, buffer.size() - maxBufferBytes);/;/' rpmparser.h
+26c26
+<         buffer.remove(0, buffer.size() - maxBufferBytes);
+---
+>         ;
+--- fuzzer exit code: 77 after 0 s (limit 120 s)

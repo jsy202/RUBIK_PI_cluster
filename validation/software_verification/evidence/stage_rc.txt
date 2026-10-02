@@ -1,0 +1,6 @@
+tests rc=0
+coverage rc=0
+sanitize rc=0
+mutate rc=0
+negctl rc=0
+fuzz 600 rc=0

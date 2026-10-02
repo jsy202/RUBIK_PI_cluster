@@ -1,0 +1,17 @@
+QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-root'
+********* Start testing of TstMainWindow *********
+Config: Using QtTest library 5.12.8, Qt 5.12.8 (x86_64-little_endian-lp64 shared (dynamic) release build; by GCC 9.3.0)
+PASS   : TstMainWindow::initTestCase()
+QDEBUG : TstMainWindow::knownDefect_speedOverflowForHugeRpm() Replaying 1 RPM samples from "/tmp/tst_mainwindow-hUEWwH/replay.txt" every 3600000 ms
+/src/mainwindow.cpp:150:43: runtime error: 5.05989e+09 is outside the range of representable values of type 'int'
+XFAIL  : TstMainWindow::knownDefect_speedOverflowForHugeRpm() DEF-SW-01: speed int conversion overflows for rpm > ~9.1e8 (UB)
+   Loc: [/src/tests/tst_mainwindow/tst_mainwindow.cpp(448)]
+PASS   : TstMainWindow::knownDefect_speedOverflowForHugeRpm()
+QDEBUG : TstMainWindow::knownDefect_animationDurationOverflow() Replaying 1 RPM samples from "/tmp/tst_mainwindow-XOzyVd/replay.txt" every 3600000 ms
+/src/mainwindow.cpp:135:38: runtime error: signed integer overflow: 2000000000 * 2 cannot be represented in type 'int'
+XFAIL  : TstMainWindow::knownDefect_animationDurationOverflow() DEF-SW-02: delta*2 overflows, duration clamps to 60 instead of 180 (UB)
+   Loc: [/src/tests/tst_mainwindow/tst_mainwindow.cpp(465)]
+PASS   : TstMainWindow::knownDefect_animationDurationOverflow()
+PASS   : TstMainWindow::cleanupTestCase()
+Totals: 4 passed, 0 failed, 0 skipped, 0 blacklisted, 15ms
+********* Finished testing of TstMainWindow *********

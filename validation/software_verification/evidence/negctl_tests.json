@@ -1,0 +1,59 @@
+{
+  "summary": {
+    "total": 3,
+    "killed": 3,
+    "survived": 0,
+    "equivalent": 0,
+    "invalid": 0,
+    "score": "3/3 = 100.0%"
+  },
+  "mutants": [
+    {
+      "id": "M04",
+      "file": "rpmparser.h",
+      "original": "if (line.size() > maxLineLen) continue;",
+      "mutant": "if (line.size() >= maxLineLen) continue;",
+      "fault": "line-length boundary > -> >= (64-byte line rejected)",
+      "status": "killed",
+      "detail": "qttest-parser: exit 1",
+      "tests": [
+        "FAIL!  : TstRpmParser::lineAtMaxLengthIsAcceptedLongerIsSkipped()"
+      ]
+    },
+    {
+      "id": "M07",
+      "file": "rpmparser.h",
+      "original": "if (!ok) continue;",
+      "mutant": "<deleted>",
+      "fault": "invalid-input rejection removed (failed parse appended as 0)",
+      "status": "killed",
+      "detail": "qttest-parser: exit 10",
+      "tests": [
+        "FAIL!  : TstMainWindow::replayPlaysAtConfiguredIntervalAndStops()",
+        "FAIL!  : TstMainWindow::replayUsesSerialLineProtocol()",
+        "FAIL!  : TstRpmParser::emptyAndWhitespaceLinesAreSkipped()",
+        "FAIL!  : TstRpmParser::extractedParserMatchesBaselineInlineCode()",
+        "FAIL!  : TstRpmParser::invalidStringsAreSkipped()",
+        "FAIL!  : TstRpmParser::overflowIsSkipped()",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(bare CR is not a separator (both values lost))",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(high bytes rejected)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(inner space rejected)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(leading NUL rejected)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(only newlines)",
+        "FAIL!  : TstRpmParser::robustnessInputClasses(value then garbage then value)"
+      ]
+    },
+    {
+      "id": "M19",
+      "file": "mainwindow.cpp",
+      "original": "qint64 dt_sp = (t_paint - t_serial);",
+      "mutant": "qint64 dt_sp = (t_serial - t_paint);",
+      "fault": "latency sign inverted in CSV",
+      "status": "killed",
+      "detail": "qttest-mainwindow: exit 1",
+      "tests": [
+        "FAIL!  : TstMainWindow::eachFrameIsLoggedOnceAfterPaint()"
+      ]
+    }
+  ]
+}

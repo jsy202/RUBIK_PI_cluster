@@ -1,0 +1,80 @@
+# trimmed copy of .verify-out/fuzz_600s.txt (scripts/sw_verify.sh fuzz 600); 3234 lines originally
+INFO: Seed: 162796420
+INFO: Loaded 1 modules   (560 inline 8-bit counters): 560 [0x5b6108, 0x5b6338), 
+INFO: Loaded 1 PC tables (560 PCs): 560 [0x5b6338,0x5b8638), 
+INFO:       14 files found in /b/fuzz/corpus
+INFO: seed corpus: files: 14 min: 3b max: 9006b total: 9425b rss: 30Mb
+#15	INITED cov: 199 ft: 637 corp: 14/9425b exec/s: 0 rss: 31Mb
+#1203649	DONE   cov: 199 ft: 1026 corp: 119/241Kb lim: 12000 exec/s: 2002 rss: 534Mb
+###### Recommended dictionary. ######
+"\xff\xff\xff\xff" # Uses: 895
+"\x01\x02" # Uses: 953
+"\x00\x00`0\x00\x08\xcc\x9e" # Uses: 953
+"\x01\x00`@\x00\x08%r" # Uses: 932
+"\x00\x00\x00\x00" # Uses: 921
+"\x9e\x0a\x19\x000`\x00\x00" # Uses: 936
+"\x00\x00a\x10\x00\x02\xd8D" # Uses: 921
+"\x00\x00\x00\x06" # Uses: 893
+"-\x00" # Uses: 915
+"\xff\xff_\x80\x00\x13p\xf1" # Uses: 911
+"\xff\xff_p\x00\x0dK\"" # Uses: 966
+"\x01\x03" # Uses: 907
+"\x00\x00\x00\x10" # Uses: 946
+"\x00\x05" # Uses: 861
+"\x01\x00`0\x01\xd4\xcf\xeb" # Uses: 932
+"\x0c\x00" # Uses: 911
+"\x03\x00\x00\x00" # Uses: 948
+"\x01\x00`\x80\x00\x04{\xf6" # Uses: 834
+"Dt\x0d\x00Pa\x00\x00" # Uses: 948
+"\x8c\xff\xa2\x000`\x00\x00" # Uses: 847
+"\x01V" # Uses: 872
+"\x08\x00\x00\x00" # Uses: 869
+"\xff\xff\xff\x02" # Uses: 805
+"\x00\x04" # Uses: 891
+"\xc5\xa2\x89\x00Pa\x00\x00" # Uses: 852
+"\x00\x00`@\x00\xcd\x19\xf2" # Uses: 835
+"\xab\x91A\x010`\x00\x00" # Uses: 837
+"\x97\xfc5\x00Pa\x00\x00" # Uses: 862
+"\xfe\xff\xff\xff" # Uses: 844
+"\xff\xff_\xc0\x00A\xa7$" # Uses: 849
+"\x09\x00" # Uses: 818
+"\x04\x00\x00\x00" # Uses: 847
+"\x03\x00" # Uses: 821
+"\x19db\x00Pa\x00\x00" # Uses: 794
+"\xec70\x02@`\x00\x00" # Uses: 823
+"\x11\x00" # Uses: 879
+"-\x07*\x020`\x00\x00" # Uses: 852
+"\x01\x00\x00\x0d" # Uses: 797
+"\xfc.\x19\x02@`\x00\x00" # Uses: 785
+"Z?&\x010`\x00\x00" # Uses: 804
+"\x01\x00``\x00'\x8a\xa2" # Uses: 786
+"\x00\x00\x00\x00\x00\x00\x00\x00" # Uses: 789
+"\x00\x00\x00\x94" # Uses: 807
+"9\x00\x00\x00" # Uses: 782
+"\x00\x00\x00P" # Uses: 775
+"k\x00\x00\x00" # Uses: 782
+"i\xb9L\x020`\x00\x00" # Uses: 813
+"\x01\x00`\xc0\x004F\xf4" # Uses: 791
+"\x18\x00\x00\x00\x00\x00\x00\x00" # Uses: 801
+"\xff\xff_@\x018\x10\xb3" # Uses: 788
+"f\xafE\x00``\x00\x00" # Uses: 807
+"\x02\x00\x00\x00" # Uses: 791
+... (progress lines omitted; first and last 5 kept)
+#17	NEW    cov: 199 ft: 643 corp: 15/20Kb lim: 12000 exec/s: 0 rss: 32Mb L: 12000/12000 MS: 2 CMP-CrossOver- DE: "\xff\xff\xff\xff"-
+#18	NEW    cov: 199 ft: 644 corp: 16/21Kb lim: 12000 exec/s: 0 rss: 32Mb L: 173/12000 MS: 1 InsertRepeatedBytes-
+#22	REDUCE cov: 199 ft: 644 corp: 16/20Kb lim: 12000 exec/s: 0 rss: 32Mb L: 8282/12000 MS: 4 ChangeBinInt-CMP-EraseBytes-InsertRepeatedBytes- DE: "\xff\xff\xff\xff"-
+#28	NEW    cov: 199 ft: 648 corp: 17/32Kb lim: 12000 exec/s: 0 rss: 33Mb L: 12000/12000 MS: 1 CrossOver-
+#51	NEW    cov: 199 ft: 651 corp: 18/32Kb lim: 12000 exec/s: 0 rss: 34Mb L: 89/12000 MS: 3 CMP-ChangeBit-EraseBytes- DE: "\x01\x02"-
+...
+#1200149	REDUCE cov: 199 ft: 1026 corp: 119/241Kb lim: 12000 exec/s: 2003 rss: 534Mb L: 362/10933 MS: 1 EraseBytes-
+#1200751	REDUCE cov: 199 ft: 1026 corp: 119/241Kb lim: 12000 exec/s: 2004 rss: 534Mb L: 925/10933 MS: 2 CrossOver-EraseBytes-
+#1200832	REDUCE cov: 199 ft: 1026 corp: 119/241Kb lim: 12000 exec/s: 2004 rss: 534Mb L: 81/10933 MS: 1 EraseBytes-
+#1200983	REDUCE cov: 199 ft: 1026 corp: 119/241Kb lim: 12000 exec/s: 2004 rss: 534Mb L: 45/10933 MS: 1 EraseBytes-
+#1203214	REDUCE cov: 199 ft: 1026 corp: 119/241Kb lim: 12000 exec/s: 2005 rss: 534Mb L: 2145/10933 MS: 1 EraseBytes-
+Done 1203649 runs in 601 second(s)
+stat::number_of_executed_units: 1203649
+stat::average_exec_per_sec:     2002
+stat::new_units_added:          3040
+stat::slowest_unit_time_sec:    0
+stat::peak_rss_mb:              534
+fuzz exit code: 0

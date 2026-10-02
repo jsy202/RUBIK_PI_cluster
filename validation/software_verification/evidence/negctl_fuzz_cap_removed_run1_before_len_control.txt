@@ -1,0 +1,60 @@
+# trimmed: first cap_removed negative-control run, BEFORE -len_control=0 (not detected in 120 s)
+INFO: Seed: 3826477448
+INFO: Loaded 1 modules   (556 inline 8-bit counters): 556 [0x5b60e8, 0x5b6314), 
+INFO: Loaded 1 PC tables (556 PCs): 556 [0x5b6318,0x5b85d8), 
+INFO:       13 files found in /b/negctl/cap_removed/corpus
+INFO: seed corpus: files: 13 min: 3b max: 104b total: 419b rss: 29Mb
+#14	INITED cov: 193 ft: 580 corp: 13/419b exec/s: 0 rss: 30Mb
+#421471	DONE   cov: 193 ft: 955 corp: 134/19Kb lim: 2237 exec/s: 3483 rss: 526Mb
+###### Recommended dictionary. ######
+"\xff\xff\xff\xff" # Uses: 1847
+"\x06\x00\x00\x00" # Uses: 1786
+"\x9a\xf5\x06\x000`\x00\x00" # Uses: 1750
+"\x09\x00\x00\x00" # Uses: 1744
+"\x01\x00\x00\x03" # Uses: 1601
+"O\\^\x010`\x00\x00" # Uses: 1640
+"\xff\xff\xff\xff\xff\xff\xff\xff" # Uses: 1529
+"\x01\x00\x00\x00\x00\x00\x00\x00" # Uses: 1459
+"\x00\x00\x00\x01" # Uses: 1585
+"\x00\x00\x00\x00\x00\x00\x00u" # Uses: 1455
+"\xff\xff\xff\xff\xff\xff\xff\x1b" # Uses: 1421
+"\x01\x07" # Uses: 1494
+"\x00\x00\x00\x00" # Uses: 1426
+"\x01\x00\x00\x00\x00\x00\x00h" # Uses: 1391
+"\x04\x00" # Uses: 1412
+"\x02\x00\x00\x00" # Uses: 1333
+"\x0d\x00" # Uses: 1134
+"\xff\x15" # Uses: 1205
+"\x00\x04" # Uses: 1003
+"\x01\x00" # Uses: 941
+"\xff\xff\xffH" # Uses: 939
+"\xff\xff\xff\x09" # Uses: 860
+"\xff\xff\xff\x03" # Uses: 736
+"\x17\x00" # Uses: 618
+"\xff\xff\xff9" # Uses: 620
+"\x00\x00\x00\x00\x00\x00\x00\x00" # Uses: 569
+"\x11\x00" # Uses: 497
+"\x01\x1a" # Uses: 490
+"\x00\x0d" # Uses: 250
+"\x01\xd1" # Uses: 218
+"t\xc1\x10\x05``\x00\x00" # Uses: 180
+###### End of recommended dictionary. ######
+Done 421471 runs in 121 second(s)
+--- injected: sed 's/buffer.remove(0, buffer.size() - maxBufferBytes);/;/' rpmparser.h
+26c26
+<         buffer.remove(0, buffer.size() - maxBufferBytes);
+---
+>         ;
+--- fuzzer exit code: 0 after 121 s (limit 120 s)
+... (progress lines omitted; first and last 5 kept)
+#17	NEW    cov: 193 ft: 594 corp: 14/523b lim: 104 exec/s: 0 rss: 30Mb L: 104/104 MS: 3 ChangeASCIIInt-ShuffleBytes-ChangeByte-
+#19	NEW    cov: 193 ft: 596 corp: 15/536b lim: 104 exec/s: 0 rss: 30Mb L: 13/104 MS: 2 InsertByte-ChangeBit-
+#21	NEW    cov: 193 ft: 599 corp: 16/548b lim: 104 exec/s: 0 rss: 30Mb L: 12/104 MS: 2 ShuffleBytes-CopyPart-
+#23	NEW    cov: 193 ft: 656 corp: 17/585b lim: 104 exec/s: 0 rss: 30Mb L: 37/104 MS: 2 InsertByte-CrossOver-
+#25	NEW    cov: 193 ft: 657 corp: 18/623b lim: 104 exec/s: 0 rss: 30Mb L: 38/104 MS: 2 ChangeASCIIInt-InsertByte-
+...
+#416967	REDUCE cov: 193 ft: 955 corp: 134/19Kb lim: 2204 exec/s: 3533 rss: 525Mb L: 77/1368 MS: 2 ChangeASCIIInt-EraseBytes-
+#418318	REDUCE cov: 193 ft: 955 corp: 134/19Kb lim: 2215 exec/s: 3515 rss: 525Mb L: 8/1368 MS: 1 EraseBytes-
+#419900	REDUCE cov: 193 ft: 955 corp: 134/19Kb lim: 2226 exec/s: 3499 rss: 526Mb L: 189/1368 MS: 2 ChangeASCIIInt-EraseBytes-
+#420294	REDUCE cov: 193 ft: 955 corp: 134/19Kb lim: 2226 exec/s: 3502 rss: 526Mb L: 174/1368 MS: 4 ChangeByte-ChangeBit-ShuffleBytes-EraseBytes-
+#420351	REDUCE cov: 193 ft: 955 corp: 134/19Kb lim: 2226 exec/s: 3502 rss: 526Mb L: 163/1368 MS: 2 ChangeBit-EraseBytes-
