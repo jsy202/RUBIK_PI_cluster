@@ -78,3 +78,10 @@ def test_existing_analyze_script_runs_on_valid_csv(tmp_path):
                        capture_output=True, text=True)
     assert r.returncode == 0 and "mean: 7.00 ms" in r.stdout
     assert (tmp_path / "out" / "latency_summary.csv").exists()
+
+
+def test_verdict_boundary_p95_equal_to_budget_passes(tmp_path):
+    # REQ-PERF-001 is "p95 <= budget" (soft budget): exactly on the budget is still PASS.
+    p = write_csv(tmp_path / "eq.csv", [(i, 20) for i in range(1, 21)])
+    assert validate_latency.summarize(analyze_latency.read_latencies(p), budget_ms=20.0)["verdict"] == "PASS"
+    assert validate_latency.summarize(analyze_latency.read_latencies(p), budget_ms=19.0)["verdict"] == "FAIL"
