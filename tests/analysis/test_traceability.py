@@ -36,6 +36,7 @@ def test_every_sw_requirement_is_linked_to_a_test():
     sw = [(rid, line) for rid, line in reqs if not rid.startswith("REQ-HW-")]
     assert len(sw) == 17
     for rid, line in sw:
-        assert re.search(r"`(tst_\w+|test_latency_analysis)::\w+`", line.split("|")[3]), f"{rid} has no test"
+        cells = re.split(r"(?<!\\)\|", line)          # escaped pipes (\|) inside cells are not separators
+        assert re.search(r"`(tst_\w+|test_latency_analysis)::\w+`", cells[3]), f"{rid} has no test"
     hw = [line for rid, line in reqs if rid.startswith("REQ-HW-")]
     assert hw and all("Hardware-dependent / Not revalidated" in line for line in hw)

@@ -16,6 +16,9 @@
 #   sanitize     tests built with ASan + UBSan; known-defect tests run separately to record reports
 #   fuzz [sec]   libFuzzer + ASan + UBSan on rpmparser.h (default 60 s)
 #   mutate       mutation testing on a temporary copy (scripts/mutation_test.py)
+#   asan_probe [n]  start-up stability of the ASan runtime on this kernel: the sanitizer-built
+#                parser test is run n times without and n times with `setarch -R` (default 20);
+#                fails only if a run WITH setarch -R fails (diagnostic, no retries)
 #   negctl       negative controls: deliberate defects in a temporary copy must make the tests,
 #                the fuzz oracles and ASan fail
 #   all          tests coverage sanitize fuzz mutate negctl
@@ -112,6 +115,19 @@ stage_mutate() {
     python3 "$SRC/scripts/mutation_test.py" --src "$SRC" --out "$OUT"
 }
 
+stage_asan_probe() {
+    local n=${1:-20} plain=0 norand=0
+    local san="-fsanitize=address,undefined,float-cast-overflow -fno-omit-frame-pointer"
+    qbuild /b/san/parser "$SRC/tests/tst_rpmparser/tst_rpmparser.pro" CONFIG+=debug "QMAKE_CXXFLAGS+=$san" "QMAKE_LFLAGS+=$san"
+    export ASAN_OPTIONS=detect_leaks=0
+    for _ in $(seq "$n"); do /b/san/parser/tst_rpmparser >/dev/null 2>&1 || plain=$((plain + 1)); done
+    for _ in $(seq "$n"); do "${NORAND[@]}" /b/san/parser/tst_rpmparser >/dev/null 2>&1 || norand=$((norand + 1)); done
+    { echo "kernel: $(uname -r)  vm.mmap_rnd_bits: $(cat /proc/sys/vm/mmap_rnd_bits 2>/dev/null || echo n/a)"
+      echo "ASan/UBSan parser test, $n runs each: without setarch -R failed $plain/$n, with setarch -R failed $norand/$n"
+    } | tee "$OUT/asan_probe.txt"
+    [ "$norand" = 0 ]
+}
+
 fuzz_negctl() {   # fuzz_negctl <name> <sed expression on rpmparser.h> <max seconds> [seed to leave out]
     local name=$1 expr=$2 secs=$3 skip=${4:-} d=/b/negctl/$1
     mkdir -p "$d/src/tests/fuzz" && cp "$SRC/rpmparser.h" "$d/src/" && cp "$SRC/tests/fuzz/fuzz_rpmparser.cpp" "$d/src/tests/fuzz/"
@@ -151,6 +167,7 @@ case "${1:-all}" in
     fuzz) stage_fuzz "${2:-60}" ;;
     mutate) stage_mutate ;;
     negctl) stage_negctl ;;
+    asan_probe) stage_asan_probe "${2:-20}" ;;
     all) stage_tests && stage_coverage && stage_sanitize && stage_fuzz "${2:-60}" && stage_mutate && stage_negctl ;;
     *) echo "unknown stage: $1" >&2; exit 2 ;;
 esac
