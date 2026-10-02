@@ -68,7 +68,10 @@ private slots:
     void intBoundaries()
     {
         QByteArray buf;
-        QCOMPARE(feed(buf, "2147483647\n-2147483648\n"), QVector<int>({INT_MAX, INT_MIN}));
+        // INT_MAX is above RpmParser::kMaxRpm and rejected since the DEF-SW-01 fix; INT_MIN is
+        // accepted and clamped to 0 by correct().
+        QCOMPARE(feed(buf, "2147483647\n-2147483648\n"), QVector<int>({INT_MIN}));
+        QCOMPARE(feed(buf, QByteArray::number(RpmParser::kMaxRpm) + "\n"), QVector<int>({RpmParser::kMaxRpm}));
     }
 
     void overflowIsSkipped()
@@ -195,13 +198,13 @@ private slots:
         QTest::newRow("trailing NUL") << QByteArray("7\0" "\n", 3) << QVector<int>{} << none;
         QTest::newRow("leading NUL") << QByteArray("\0" "7\n1\n", 5) << QVector<int>{1} << none;
         QTest::newRow("NUL-only line between frames") << QByteArray("7\n\0\n8\n", 6) << QVector<int>{7, 8} << none;
-        // overflow and upper bound (DEF-SW-01: larger values make update_values() overflow)
+        // overflow and upper bound (DEF-SW-01, fixed: larger values made update_values() overflow)
         QTest::newRow("overflow: INT_MAX + 1") << QByteArray("2147483648\n") << QVector<int>{} << none;
         QTest::newRow("overflow: INT_MIN - 1") << QByteArray("-2147483649\n") << QVector<int>{} << none;
         QTest::newRow("overflow: 20 digits") << QByteArray("99999999999999999999\n") << QVector<int>{} << none;
         QTest::newRow("bound: largest speed-safe RPM") << QByteArray("911420367\n") << QVector<int>{911420367} << none;
-        QTest::newRow("bound: one above") << QByteArray("911420368\n") << QVector<int>{} << "DEF-SW-01";
-        QTest::newRow("bound: INT_MAX") << QByteArray("2147483647\n") << QVector<int>{} << "DEF-SW-01";
+        QTest::newRow("bound: one above") << QByteArray("911420368\n") << QVector<int>{} << none;
+        QTest::newRow("bound: INT_MAX") << QByteArray("2147483647\n") << QVector<int>{} << none;
         QTest::newRow("bound: INT_MIN still accepted (clamped later)") << QByteArray("-2147483648\n") << QVector<int>{INT_MIN} << none;
     }
     void robustnessInputClasses()

@@ -9,16 +9,26 @@
 //   - the line is trimmed (so "\r\n" and surrounding spaces are tolerated) and parsed as a
 //     base-10 int; non-integers / out-of-int-range values are skipped
 //   - an unterminated tail stays in the buffer for the next call
-// Post-project fix (DEF-SW-04): the whole trimmed line must be [+|-]digits, see parseLine().
+// Post-project fixes: the whole trimmed line must be [+|-]digits (DEF-SW-04) and the value must be
+// <= kMaxRpm (DEF-SW-01), see parseLine().
 
 #include <QByteArray>
 #include <QVector>
 
 namespace RpmParser {
 
+// Largest RPM the application can process without undefined behaviour (DEF-SW-01):
+// MainWindow::update_values() computes speed = rpm * (4.5/2.5) * (pi*2.5) * 10/60 in double and
+// converts it to int. For 911420367 that is 2147483646.97 (fits); for 911420368 it is
+// 2147483649.33 (> INT_MAX). Derived from the code and the int type, not from a vehicle RPM range.
+// tst_mainwindow re-computes both values with the same expression.
+constexpr int kMaxRpm = 911420367;
+
 // One line -> raw RPM. After trimming ASCII whitespace the line must be an optional sign followed
 // by one or more ASCII digits, and fit in int. Anything else is rejected, including an embedded
 // NUL: Qt 5.12 QString::toInt() stops at a NUL and accepted "7\0abc" as 7 (DEF-SW-04).
+// Values above kMaxRpm are rejected like out-of-int-range values (DEF-SW-01); negative values are
+// accepted here and clamped to 0 by correct().
 inline bool parseLine(const QByteArray &line, int &value)
 {
     const QByteArray t = line.trimmed();
@@ -30,7 +40,7 @@ inline bool parseLine(const QByteArray &line, int &value)
             return false;
     bool ok = false;
     value = t.toInt(&ok, 10);                           // digits only here; ok == false on overflow
-    return ok;
+    return ok && value <= kMaxRpm;
 }
 
 inline QVector<int> consume(QByteArray &buffer, const QByteArray &chunk,
@@ -57,7 +67,8 @@ inline QVector<int> consume(QByteArray &buffer, const QByteArray &chunk,
     return values;
 }
 
-// MainWindow::correctRpmValue(): negative values are clamped to 0, no upper bound.
+// MainWindow::correctRpmValue(): negative values are clamped to 0. The upper bound is enforced
+// when parsing (kMaxRpm), so correct() itself has none.
 inline int correct(int rawRpm)
 {
     return rawRpm < 0 ? 0 : rawRpm;

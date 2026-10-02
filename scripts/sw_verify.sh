@@ -28,8 +28,8 @@ export QT_QPA_PLATFORM=offscreen
 NORAND=(setarch "$(uname -m)" -R)
 mkdir -p "$OUT"
 
-# known-defect tests (QEXPECT_FAIL) that execute undefined behaviour on purpose (DEF-SW-01/02)
-KNOWN_UB_TESTS="knownDefect_speedOverflowForHugeRpm knownDefect_animationDurationOverflow"
+# known-defect tests (QEXPECT_FAIL) that execute undefined behaviour on purpose (DEF-SW-02)
+KNOWN_UB_TESTS="knownDefect_animationDurationOverflow"
 
 qbuild() {   # qbuild <builddir> <pro> [qmake args...]
     local dir=$1 pro=$2; shift 2
