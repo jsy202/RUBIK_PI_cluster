@@ -1,0 +1,11 @@
+# Hardware-free software verification image (post-project): same Ubuntu 20.04 / Qt 5.12 toolchain as
+# Dockerfile.test, plus gcov/gcovr (coverage), clang-10 + libFuzzer (fuzzing) and ASan/UBSan.
+# Used by scripts/sw_verify.sh. Nothing here runs on RUBIK Pi hardware.
+FROM ubuntu:20.04
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y \
+    build-essential qtbase5-dev qt5-qmake qtbase5-dev-tools libqt5serialport5-dev \
+    clang-10 python3 python3-pip socat \
+    && rm -rf /var/lib/apt/lists/* \
+    && python3 -m pip install --no-cache-dir gcovr==7.2 pytest==8.3.3 pytest-cov==5.0.0
+WORKDIR /src
