@@ -189,10 +189,10 @@ private slots:
         QTest::newRow("garbage: exponent") << QByteArray("1e3\n") << QVector<int>{} << none;
         QTest::newRow("garbage: hex") << QByteArray("0x1F\n") << QVector<int>{} << none;
         QTest::newRow("garbage: separator") << QByteArray("1,000\n1_000\n") << QVector<int>{} << none;
-        // embedded NUL (DEF-SW-04: Qt 5.12 QString::toInt() stops at NUL)
-        QTest::newRow("NUL inside digits") << QByteArray("25\0" "00\n1\n", 8) << QVector<int>{1} << "DEF-SW-04";
-        QTest::newRow("NUL then letters") << QByteArray("7\0" "abc\n", 6) << QVector<int>{} << "DEF-SW-04";
-        QTest::newRow("trailing NUL") << QByteArray("7\0" "\n", 3) << QVector<int>{} << "DEF-SW-04";
+        // embedded NUL (DEF-SW-04, fixed: Qt 5.12 QString::toInt() stopped at NUL)
+        QTest::newRow("NUL inside digits") << QByteArray("25\0" "00\n1\n", 8) << QVector<int>{1} << none;
+        QTest::newRow("NUL then letters") << QByteArray("7\0" "abc\n", 6) << QVector<int>{} << none;
+        QTest::newRow("trailing NUL") << QByteArray("7\0" "\n", 3) << QVector<int>{} << none;
         QTest::newRow("leading NUL") << QByteArray("\0" "7\n1\n", 5) << QVector<int>{1} << none;
         QTest::newRow("NUL-only line between frames") << QByteArray("7\n\0\n8\n", 6) << QVector<int>{7, 8} << none;
         // overflow and upper bound (DEF-SW-01: larger values make update_values() overflow)
@@ -222,13 +222,14 @@ private slots:
         // frame boundary: the digits and the NUL-containing tail arrive in different reads
         QByteArray buf;
         QCOMPARE(feed(buf, "7"), QVector<int>());
-        QEXPECT_FAIL("", "DEF-SW-04 (known, not fixed yet)", Continue);
         QCOMPARE(feed(buf, QByteArray("\0" "abc\n8\n", 7)), QVector<int>{8});
     }
 
     void extractedParserMatchesBaselineInlineCode()
     {
         // Differential check: same chunk sequence through both implementations, buffers compared too.
+        // Since the post-project fixes the two intentionally differ only for lines with an embedded
+        // NUL (DEF-SW-04) and values above 911420367 (DEF-SW-01); these chunks contain neither.
         const QList<QByteArray> chunks = {
             "2500\n", "25", "00\n26", "00\r\n", "abc\n-5\n", "\n \n", "2147483648\n",
             QByteArray(70, '7') + "\n", "1\n2\n3", "\n", QByteArray(9000, '9'), "\n42\n",
