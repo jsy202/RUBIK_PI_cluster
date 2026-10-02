@@ -15,6 +15,7 @@ Sensor → Arduino → Serial → readSerialData() → acceptRpmSample()  [t_in]
 
 > **출처: original research poster result.** RUBIK Pi 3 연구 환경에서 측정한 값이다. 원본 측정 CSV는 이 저장소에 포함되어 있지 않다.
 > 아래의 Post-project Software Verification(PC/Docker)과는 별개이며, 그 결과와 섞거나 같은 조건으로 비교하지 않는다.
+> 측정한 코드는 연구 당시 코드인 tag [`research-baseline`](https://github.com/jsy202/RUBIK_PI_cluster/tree/research-baseline) (`4d4e3f8`)이다. 이후 main에 반영된 SW 수정(DEF-SW-01/02/04)은 이 결과에 포함되지 않으며, 수정된 코드는 RUBIK Pi에서 측정하지 않았다.
 
 | 항목 | 값 |
 |---|---|
@@ -48,7 +49,7 @@ RPM 수신 이후 Qt 렌더링 완료까지 1,000회 측정한 결과 평균 10.
 |---|---|
 | Code coverage (C++ app logic, gcov) | line **8.1% → 97.1%**, branch **약 7% → 85.9%** |
 | 발견한 SW 결함 | **4건 — 3건 수정, 1건은 측정 한계로 유지** (아래) |
-| Parser fuzzing (libFuzzer + ASan/UBSan, 수정 후) | 600 s, 511,839 inputs, crash 0, sanitizer violation 0 |
+| Parser fuzzing (libFuzzer + ASan/UBSan, 수정 후) — **대상은 RPM parser(`rpmparser.h`)뿐** | 600 s, 511,839 inputs, crash 0, sanitizer violation 0 |
 | Sanitizer (ASan + UBSan, 전체 QtTest) | 수정 전 UB 2건 검출 → 수정 후 0건 |
 
 | 결함 | 내용 | 상태 |
