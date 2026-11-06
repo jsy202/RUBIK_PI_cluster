@@ -1,6 +1,6 @@
 # RUBIK Pi 3 Qt Digital Cluster — Quantitative UI Latency Verification
 
-30 Hz UI 요구를 약 33.3 ms의 측정 기준으로 구체화하고, 실제 RUBIK Pi 연구 환경에서 1,000회 반복 측정해 Qt 애플리케이션 내부의 렌더링 지연을 정량 검증한 프로젝트다.
+30 Hz UI 요구를 약 33.3 ms의 측정 기준으로 구체화하고, 실제 RUBIK Pi 연구 환경에서 3,000회 이상 반복 측정해 Qt 애플리케이션 내부의 렌더링 지연을 정량 검증한 프로젝트다.
 
 ## Project
 RUBIK Pi 3 보드에서 동작하는 C++/Qt5 디지털 클러스터다. Arduino가 시리얼(9600 baud)로 보내는 RPM 값을 화면에 표시하고, 그 과정의 지연시간을 CSV로 기록해 분석한다.
@@ -21,11 +21,11 @@ Sensor → Arduino → Serial → readSerialData() → acceptRpmSample()  [t_in]
 |---|---|
 | 목표 UI update rate | 30 Hz |
 | 비교 기준 | 약 33.3 ms (30 Hz 한 주기, soft budget) |
-| 측정 횟수 | 1,000회 |
+| 측정 횟수 | 3,000회 이상 |
 | 평균 latency | **10.38 ms** |
 | 최대 latency | **21 ms** |
 
-RPM 수신 이후 Qt 렌더링 완료까지 1,000회 측정한 결과 평균 10.38 ms, 최대 21 ms로, 30 Hz 요구 기준인 약 33.3 ms 이내임을 확인했다.
+RPM 수신 이후 Qt 렌더링 완료까지 3,000회 이상 측정한 결과 평균 10.38 ms, 최대 21 ms로, 30 Hz 요구 기준인 약 33.3 ms 이내임을 확인했다.
 
 ## Measurement Boundary
 
