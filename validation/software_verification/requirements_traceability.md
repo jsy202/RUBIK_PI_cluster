@@ -36,7 +36,7 @@ Result 열의 의미:
 | **REQ-MEAS-003** CSV 파일을 만들 수 없어도 표시 경로는 계속 동작하고, 로깅만 생략한다 | 생성자 L27, `MainWindow::logEvent` L165 | `tst_mainwindow::displayWorksWhenCsvCannotBeCreated` | coverage: 두 분기 모두 실행됨 | PASS |
 | **REQ-PERF-001** (분석 로직) 지연 CSV를 `p95 ≤ 33.3 ms` soft budget으로 판정한다. budget과 같으면 PASS, 초과하면 FAIL이다. exit code는 PASS 0, FAIL 1, 입력 오류 2다 | `scripts/validate_latency.py` `summarize`, `main`; `scripts/analyze_latency.py` `percentile` | `test_latency_analysis::test_percentile_matches_linear_interpolation`, `test_latency_analysis::test_summary_statistics_and_budget`, `test_latency_analysis::test_verdict_fails_when_p95_exceeds_budget`, `test_latency_analysis::test_verdict_boundary_p95_equal_to_budget_passes`, `test_latency_analysis::test_cli_exit_codes`, `test_latency_analysis::test_missing_columns_is_input_error` | mutation P01/P03 killed | PASS (판정 로직만 해당. 하드웨어 성능은 HW-001) |
 | **REQ-PERF-002** 지연 보고서는 로그되지 않은 샘플 수(seq 공백)를 보고한다 | `validate_latency.coalesced_samples` | `test_latency_analysis::test_seq_gaps_count_samples_not_logged` | mutation P02 killed | PASS |
-| **REQ-HW-001** 실제 RUBIK Pi 3에서 측정 구간(`sample accepted → QLabel paintEvent completed`)의 지연이 30 Hz 기준(약 33.3 ms) 안에 든다 | 측정 코드는 research-baseline과 동일 | – | **Historical research result**: 1,000회, 평균 10.38 ms, 최대 21 ms (원본 CSV는 저장소에 없음) | **Hardware-dependent / Not revalidated** |
+| **REQ-HW-001** 실제 RUBIK Pi 3에서 측정 구간(`sample accepted → QLabel paintEvent completed`)의 지연이 30 Hz 기준(약 33.3 ms) 안에 든다 | 측정 코드는 research-baseline과 동일 | – | **Historical research result**: 3,000회 이상, 평균 10.38 ms, 최대 21 ms (원본 CSV는 저장소에 없음) | **Hardware-dependent / Not revalidated** |
 | **REQ-HW-002** Arduino에서 UART 9600 baud로 보낸 RPM 줄을 앱이 받는다 | `setupSerialPort`, `readSerialData` | (pty 테스트는 앱 내부 경로만 확인하며 UART가 아니다) | – | **Hardware-dependent / Not revalidated** |
 
 ## 집계
@@ -62,5 +62,5 @@ Result 열의 의미:
 ### DEF-SW-03에 대해 말할 수 있는 것과 없는 것
 
 - **사실:** 이 동작은 host 환경(Qt 5.12.8 offscreen)에서 **실제로 재현됐다.** 기존 `measurement_boundary.md`에는 정적 분석(B) 수준의 "가능성"으로 적혀 있었다.
-- **판단할 수 없음:** 연구 당시 결과(1,000회, 평균 10.38 ms, 최대 21 ms)에 이 동작이 얼마나 영향을 주었는지는 **판단할 수 없다.** 원본 측정 CSV가 저장소에 없고, 연구 당시 입력 패턴(같은 값이 연속으로 들어온 빈도)과 rpmLabel이 다른 이유로 repaint된 빈도를 알 수 없다.
+- **판단할 수 없음:** 연구 당시 결과(3,000회 이상, 평균 10.38 ms, 최대 21 ms)에 이 동작이 얼마나 영향을 주었는지는 **판단할 수 없다.** 원본 측정 CSV가 저장소에 없고, 연구 당시 입력 패턴(같은 값이 연속으로 들어온 빈도)과 rpmLabel이 다른 이유로 repaint된 빈도를 알 수 없다.
 - 따라서 Historical Result가 **무효라고 단정하지 않는다.** 동시에 **영향이 없었다고도 단정하지 않는다.**
