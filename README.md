@@ -40,7 +40,7 @@ RPM 수신 이후 Qt 렌더링 완료까지 3,000회 이상 측정한 결과 평
 
 코드 기준의 상세 정의: [validation/measurement_boundary.md](validation/measurement_boundary.md)
 
-## Post-project Software Verification (2026-10, 연구 종료 후)
+## Post-project Software Verification 
 > 보조 섹션이다. 위 Historical Research Result를 다시 측정하거나 대체하지 않는다. **RUBIK Pi 3 하드웨어 없이**, 개발 PC + Docker(Qt offscreen)에서 수행했다. 연구 당시 코드는 tag [`research-baseline`](https://github.com/jsy202/RUBIK_PI_cluster/tree/research-baseline) (`4d4e3f8`)에 있다.
 
 기존 실제 하드웨어 연구 이후, host 환경에서 직접 작성한 C++ application logic(parser, 30 Hz 갱신, 속도 변환, CSV 계측)의 SW 검증 범위를 coverage, mutation, fuzz testing으로 확장했다.
