@@ -13,6 +13,9 @@ Sensor → Arduino → Serial → readSerialData() → acceptRpmSample()  [t_in]
 
 ## Historical Research Result (original research / poster)
 
+- 논문: 「루빅파이 3에서 QT 기반 디지털 클러스터 시스템의 성능 평가」
+- 정승육(SeungYook Jung): 제1저자
+
 > **출처: original research poster result.** RUBIK Pi 3 연구 환경에서 측정한 값이다. 원본 측정 CSV는 이 저장소에 포함되어 있지 않다.
 > 아래의 Post-project Software Verification(PC/Docker)과는 별개이며, 그 결과와 섞거나 같은 조건으로 비교하지 않는다.
 > 측정한 코드는 연구 당시 코드인 tag [`research-baseline`](https://github.com/jsy202/RUBIK_PI_cluster/tree/research-baseline) (`4d4e3f8`)이다. 이후 main에 반영된 SW 수정(DEF-SW-01/02/04)은 이 결과에 포함되지 않으며, 수정된 코드는 RUBIK Pi에서 측정하지 않았다.
