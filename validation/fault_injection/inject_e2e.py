@@ -45,13 +45,21 @@ def make_truth(frames: int, seed: int):
     return [int(2500 + 1700 * math.sin(i * 0.02 * 1.3)) + rng.randint(-60, 60) for i in range(frames)]
 
 
-def make_faults(frames: int, rate: float, seed: int):
+def make_faults(frames: int, rate: float, seed: int, count=None):
+    """Faults keyed by frame index. With `count`, exactly that many faults are placed at random
+    frames (rate is ignored); otherwise each frame gets one with probability `rate`."""
     rng = random.Random(seed + 1)
+
+    def one():
+        return {"type": rng.randrange(3), "pos": rng.random(), "bit": rng.randrange(8),
+                "byte": rng.randrange(256)}
+
+    if count is not None:
+        return {i: one() for i in sorted(rng.sample(range(2, frames - 2), count))}
     faults = {}
     for i in range(2, frames - 2):
         if rng.random() < rate:
-            faults[i] = {"type": rng.randrange(3), "pos": rng.random(), "bit": rng.randrange(8),
-                         "byte": rng.randrange(256)}
+            faults[i] = one()
     return faults
 
 
@@ -88,6 +96,7 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--frames", type=int, default=10000)
     ap.add_argument("--rate", type=float, default=0.01)
+    ap.add_argument("--faults", type=int, default=None, help="inject exactly this many faults (overrides --rate)")
     ap.add_argument("--seed", type=int, default=20261123)
     ap.add_argument("--period-ms", type=float, default=20.0)
     a = ap.parse_args()
@@ -95,7 +104,7 @@ def main():
     os.makedirs(a.out, exist_ok=True)
 
     truth = make_truth(a.frames, a.seed)
-    faults = make_faults(a.frames, a.rate, a.seed)
+    faults = make_faults(a.frames, a.rate, a.seed, a.faults)
 
     master, slave = pty.openpty()
     tty.setraw(slave)
@@ -152,7 +161,7 @@ def main():
         reasons[r["reason"]] = reasons.get(r["reason"], 0) + 1
     summary = {
         "stage": a.stage, "frames": a.frames, "period_ms": a.period_ms, "fault_rate_per_frame": a.rate,
-        "seed": a.seed, "injected": len(injections),
+        "seed": a.seed, "exact_faults": a.faults, "injected": len(injections),
         "painted_rows": len(rows), "alignment_match_ratio": round(match, 3),
         "wrong_values_painted": len(wrong), "reject_log_rows": len(rejects), "reject_reasons": reasons,
     }

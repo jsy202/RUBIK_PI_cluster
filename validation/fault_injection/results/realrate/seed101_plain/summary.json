@@ -1,0 +1,25 @@
+{
+ "summary": {
+  "stage": "plain",
+  "frames": 32400,
+  "period_ms": 20.0,
+  "fault_rate_per_frame": 0.01,
+  "seed": 101,
+  "exact_faults": 1,
+  "injected": 1,
+  "painted_rows": 19544,
+  "alignment_match_ratio": 1.0,
+  "wrong_values_painted": 0,
+  "reject_log_rows": 0,
+  "reject_reasons": {}
+ },
+ "wrong_painted": [],
+ "injections": [
+  {
+   "frame": 4857,
+   "type": "insert",
+   "original_hex": "333534310a",
+   "sent_hex": "3335345d310a"
+  }
+ ]
+}

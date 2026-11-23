@@ -16,6 +16,7 @@
 #include <random>
 #include <vector>
 #include <map>
+#include <set>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -33,7 +34,7 @@ static void applyFault(QByteArray &l, const Fault &f)
     else                  { const int p = int(f.pos * (len + 1)); l.insert(p, char(f.byte)); }
 }
 
-struct Out { vector<Emit> em; long rejects = 0; };
+struct Out { vector<Emit> em; long rejects = 0; std::set<long> rejectFrames; };
 
 static Out run(Stage st, int D, const vector<int> &truth, const std::map<long, Fault> &faults)
 {
@@ -45,6 +46,7 @@ static Out run(Stage st, int D, const vector<int> &truth, const std::map<long, F
         if (st == CRC) {
             const FrameCheck::Result r = FrameCheck::consume(buf, l, 64, 8192);
             o.rejects += r.rejects.size();
+            if (!r.rejects.isEmpty()) o.rejectFrames.insert(i);
             for (int x : r.values) o.em.push_back({i, RpmParser::correct(x)});
         } else {
             const QVector<int> vals = RpmParser::consume(buf, l, 64, 8192);
@@ -103,6 +105,32 @@ int main(int argc, char **argv)
         vector<char> has(N, 0); for (const auto &e : clean.em) has[e.frame] = 1;
         long dropped = 0; for (long i = 0; i < N; ++i) dropped += !has[i];
         printf("%s | %ld | %ld | %ld / %ld | %ld\n", c.name, wrong, shown, dropped, N, o.rejects);
+    }
+
+    // ---- per-fault outcome: how many of the injected faults did each check find? ----
+    // For a fault injected at frame i, the frames i and i+1 are examined (a lost line terminator
+    // merges two frames). missed   = a wrong value was accepted there (silently shown)
+    //                    filtered = no wrong value, and a frame that the clean run emits was dropped
+    //                    no effect= nothing changed
+    // found-in-log = the check left a record for that fault. Only the CRC mode writes a reject log
+    // in the application; the change-width limit exists only in this simulation.
+    printf("\nper-fault outcome (injected=%zu)\n", faults.size());
+    printf("stage | filtered (found) | missed (wrong value accepted) | no effect | found in a log\n");
+    for (const auto &c : cfgs) {
+        const Out o = run(c.st, c.D, truth, faults);
+        const Out clean = run(c.st, c.D, truth, none);
+        vector<char> has(N + 2, 0), hasClean(N + 2, 0), wrongAt(N + 2, 0);
+        for (const auto &e : o.em) { has[e.frame] = 1; if (e.value != std::max(0, truth[e.frame])) wrongAt[e.frame] = 1; }
+        for (const auto &e : clean.em) hasClean[e.frame] = 1;
+        long filtered = 0, missed = 0, noeffect = 0, logged = 0;
+        for (const auto &kv : faults) {
+            const long i = kv.first;
+            const bool wrong = wrongAt[i] || wrongAt[i + 1];
+            const bool dropped = (!has[i] && hasClean[i]) || (!has[i + 1] && hasClean[i + 1]);
+            if (wrong) ++missed; else if (dropped) ++filtered; else ++noeffect;
+            if (c.st == CRC && (o.rejectFrames.count(i) || o.rejectFrames.count(i + 1))) ++logged;
+        }
+        printf("%s | %ld | %ld | %ld | %ld\n", c.name, filtered, missed, noeffect, logged);
     }
     return 0;
 }
