@@ -489,8 +489,7 @@ private slots:
     }
 
     // The strict sanitizer run (halt on first report) sets RUBIK_SKIP_KNOWN_UB and skips the two tests
-    // below that execute UB on purpose; scripts/sw_verify.sh runs them separately and records the
-    // sanitizer reports they trigger.
+    // below that execute UB on purpose (the sanitizer scripts were removed; see git history).
     // ---- Known defects found by this verification (not fixed: research code is kept as is) ------
     // Each check states the expected behaviour; QEXPECT_FAIL records the current deviation, so the
     // test turns into XPASS (= failure) if the behaviour changes and the record must be updated.

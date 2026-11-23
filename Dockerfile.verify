@@ -1,6 +1,6 @@
-# Hardware-free software verification image (post-project): same Ubuntu 20.04 / Qt 5.12 toolchain as
-# Dockerfile.test, plus gcov/gcovr (coverage), clang-10 + libFuzzer (fuzzing) and ASan/UBSan.
-# Used by scripts/sw_verify.sh. Nothing here runs on RUBIK Pi hardware.
+# Hardware-free test image: same Ubuntu 20.04 / Qt 5.12 toolchain as Dockerfile.test, plus python3 and
+# pytest. Used by scripts/run_unit_tests.sh and validation/fault_injection. Nothing here runs on
+# RUBIK Pi hardware.
 FROM ubuntu:20.04
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \

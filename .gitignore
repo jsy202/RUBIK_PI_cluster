@@ -16,5 +16,3 @@ ui_*.h
 __pycache__/
 .pytest_cache/
 
-# software verification outputs (scripts/sw_verify.sh)
-/.verify-out*/
