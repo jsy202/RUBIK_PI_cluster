@@ -83,6 +83,11 @@ private:
     int m_seq{0};
     int m_lastLoggedSeq{0};
 
+    // CLUSTER_PROTECT=1: lines carry a CRC-8 ("value,HH"); rejected lines are logged, not displayed
+    bool m_protect{false};
+    QFile m_rejectFile;
+    QTextStream m_rejectLog;
+
     qint64 m_lastSerialTime{0};
     int m_lastRpmValue{0};
     int m_lastRawRpmValue{0};

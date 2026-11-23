@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "rpmparser.h"
+#include "framecheck.h"
 
 #include <QSerialPortInfo>
 #include <QDebug>
@@ -27,6 +28,18 @@ MainWindow::MainWindow(QWidget *parent)
     if (m_csvFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
         m_csv.setDevice(&m_csvFile);
         m_csv << "seq,source,t_in_ms,t_frame_ms,e2e_latency_ms,raw_rpm,rpm\n";
+    }
+
+    // === 무결성 검사 모드 (임시조치): 거부된 줄 기록 ===
+    const QByteArray protect = qgetenv("CLUSTER_PROTECT");
+    m_protect = (protect == "1" || protect.toLower() == "true");
+    if (m_protect) {
+        m_rejectFile.setFileName(QString("reject_log_%1.csv").arg(timestamp));
+        if (m_rejectFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            m_rejectLog.setDevice(&m_rejectFile);
+            m_rejectLog << "t_ms,reason,raw_hex\n";
+            m_rejectLog.flush();
+        }
     }
 
     // 속도 업데이트 타이머
@@ -73,6 +86,8 @@ MainWindow::~MainWindow()
         m_serialPort->close();
     if (m_csvFile.isOpen())
         m_csvFile.close();
+    if (m_rejectFile.isOpen())
+        m_rejectFile.close();
     delete ui;
 }
 
@@ -90,6 +105,23 @@ void MainWindow::setDisplayRpm(int rpm) noexcept
 
 void MainWindow::readSerialData()
 {
+    if (m_protect) {
+        const FrameCheck::Result r =
+            FrameCheck::consume(m_serialBuffer, m_serialPort->readAll(), kMaxLineLen, kMaxBufferBytes);
+        for (const auto &rej : r.rejects) {
+            const char *reason = rej.reason == FrameCheck::Reject::Crc ? "crc"
+                               : rej.reason == FrameCheck::Reject::TooLong ? "too_long" : "format";
+            if (m_rejectLog.device()) {
+                m_rejectLog << m_timerBase.elapsed() << "," << reason << ","
+                            << QString::fromLatin1(rej.raw.toHex().toUpper()) << "\n";
+                m_rejectLog.flush();
+            }
+        }
+        for (const int rawRpm : r.values)
+            acceptRpmSample(rawRpm, "serial");
+        return;
+    }
+
     // Line parsing lives in rpmparser.h (unit-tested); behaviour unchanged.
     const QVector<int> samples =
         RpmParser::consume(m_serialBuffer, m_serialPort->readAll(), kMaxLineLen, kMaxBufferBytes);

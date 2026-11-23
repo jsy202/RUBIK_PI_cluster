@@ -1,0 +1,9 @@
+QT       += core testlib
+QT       -= gui
+CONFIG   += console c++17 testcase
+CONFIG   -= app_bundle
+TARGET    = tst_framecheck
+TEMPLATE  = app
+INCLUDEPATH += ../..
+HEADERS  += ../../framecheck.h ../../rpmparser.h
+SOURCES  += tst_framecheck.cpp

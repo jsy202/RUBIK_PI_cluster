@@ -5,6 +5,6 @@ CONFIG   -= app_bundle
 TARGET    = tst_mainwindow
 TEMPLATE  = app
 INCLUDEPATH += ../..
-HEADERS  += ../../mainwindow.h ../../timestamplabel.h ../../rpmparser.h
+HEADERS  += ../../mainwindow.h ../../timestamplabel.h ../../rpmparser.h ../../framecheck.h
 SOURCES  += tst_mainwindow.cpp ../../mainwindow.cpp
 FORMS    += ../../mainwindow.ui

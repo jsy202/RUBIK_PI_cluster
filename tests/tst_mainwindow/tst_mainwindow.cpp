@@ -18,6 +18,7 @@
 
 #include "mainwindow.h"
 #include "timestamplabel.h"
+#include "framecheck.h"
 
 namespace {
 
@@ -72,6 +73,18 @@ class TstMainWindow : public QObject
         return rows;
     }
     QStringList dataRows() const { QStringList r = csvRows(); if (!r.isEmpty()) r.removeFirst(); return r; }
+
+    // MainWindow (CLUSTER_PROTECT=1) writes reject_log_<timestamp>.csv: t_ms,reason,raw_hex
+    QStringList rejectRows() const
+    {
+        const QStringList files = QDir(m_dir->path()).entryList({"reject_log_*.csv"});
+        if (files.size() != 1) return {};
+        QFile f(m_dir->filePath(files.first()));
+        if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) return {};
+        QStringList rows = QString::fromUtf8(f.readAll()).split('\n', QString::SkipEmptyParts);
+        if (!rows.isEmpty()) rows.removeFirst();            // header
+        return rows;
+    }
 
     QString writeReplay(const QByteArray &content)
     {
@@ -414,6 +427,56 @@ private slots:
             QCOMPARE(fields(rows[0])[5], QString("2500"));
             QCOMPARE(fields(rows[1])[5], QString("-7"));
             QCOMPARE(fields(rows[1])[6], QString("0"));
+        }
+        ::close(master);
+    }
+
+    // Containment for intermittent serial corruption (CLUSTER_PROTECT=1): a well-formed but wrong
+    // number whose CRC does not match must not reach the display, the previous value stays, and the
+    // dropped line is recorded (reason + raw bytes) so the event can be analysed afterwards.
+    void protectedSerialPathHoldsLastValueAndLogsRejectedLine()
+    {
+        const int master = posix_openpt(O_RDWR | O_NOCTTY);
+        QVERIFY(master >= 0);
+        QVERIFY(grantpt(master) == 0 && unlockpt(master) == 0);
+        const QByteArray slave = ptsname(master);
+        {
+            EnvGuard env{{"CLUSTER_SERIAL_PORT", slave}, {"CLUSTER_BAUD", "9600"}, {"CLUSTER_PROTECT", "1"}};
+            MainWindow w;
+            showAndWait(w);
+
+            auto send = [&](const QByteArray &b) { QCOMPARE(::write(master, b.constData(), b.size()), ssize_t(b.size())); };
+            send(FrameCheck::encode(2500));
+            QTRY_COMPARE_WITH_TIMEOUT(rpmLabel(w)->text(), QString("2500"), 2000);
+
+            send("3500,62\n");                                   // 2500 with one digit changed, old CRC
+            QTRY_COMPARE_WITH_TIMEOUT(rejectRows().size(), 1, 2000);
+            QTest::qWait(150);                                   // several 30 Hz flushes
+            QCOMPARE(rpmLabel(w)->text(), QString("2500"));
+
+            const QStringList f = fields(rejectRows().first());  // t_ms,reason,raw_hex
+            QCOMPARE(f.size(), 3);
+            QCOMPARE(f[1], QString("crc"));
+            QCOMPARE(f[2], QString("3500,62").toLatin1().toHex().toUpper());
+
+            send(FrameCheck::encode(2600));                      // link recovers on the next frame
+            QTRY_COMPARE_WITH_TIMEOUT(rpmLabel(w)->text(), QString("2600"), 2000);
+            QCOMPARE(dataRows().size(), 2);                      // only the two good samples were logged
+        }
+        ::close(master);
+    }
+
+    // The unprotected path keeps its old behaviour: no reject log is created.
+    void unprotectedSerialPathCreatesNoRejectLog()
+    {
+        const int master = posix_openpt(O_RDWR | O_NOCTTY);
+        QVERIFY(master >= 0);
+        QVERIFY(grantpt(master) == 0 && unlockpt(master) == 0);
+        const QByteArray slave = ptsname(master);
+        {
+            EnvGuard env{{"CLUSTER_SERIAL_PORT", slave}, {"CLUSTER_BAUD", "9600"}};
+            MainWindow w;
+            QVERIFY(QDir(m_dir->path()).entryList({"reject_log_*.csv"}).isEmpty());
         }
         ::close(master);
     }

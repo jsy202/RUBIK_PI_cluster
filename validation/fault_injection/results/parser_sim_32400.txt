@@ -1,0 +1,8 @@
+# parser-level simulation: frames=9000000 (20 ms => 50.0 h), seed=20261123, 1 fault per ~32400 frames
+# injected=247 (bit flip 78 / delete 82 / insert 87)
+
+stage | wrong accepted | wrong shown on screen | clean frames wrongly dropped | rejects logged
+1 format check only (current) | 106 | 64 | 0 / 9000000 | 0
+2a change-width limit D=200 | 19 | 10 | 0 / 9000000 | 89
+2b change-width limit D=100 | 18 | 13 | 1233991 / 9000000 | 1640953
+3 CRC-8 | 0 | 0 | 0 / 9000000 | 245

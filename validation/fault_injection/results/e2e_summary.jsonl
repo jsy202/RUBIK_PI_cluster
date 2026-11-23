@@ -1,0 +1,2 @@
+{"stage": "plain", "frames": 10000, "period_ms": 20.0, "fault_rate_per_frame": 0.01, "seed": 20261123, "injected": 104, "painted_rows": 6005, "alignment_match_ratio": 0.996, "wrong_values_painted": 31, "reject_log_rows": 0, "reject_reasons": {}}
+{"stage": "protect", "frames": 10000, "period_ms": 20.0, "fault_rate_per_frame": 0.01, "seed": 20261123, "injected": 104, "painted_rows": 5984, "alignment_match_ratio": 1.0, "wrong_values_painted": 0, "reject_log_rows": 103, "reject_reasons": {"format": 41, "crc": 62}}

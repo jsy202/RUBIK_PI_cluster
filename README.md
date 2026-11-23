@@ -1,6 +1,46 @@
-# RUBIK Pi 3 Qt Digital Cluster — Quantitative UI Latency Verification
+# RUBIK Pi 3 Qt Digital Cluster
 
-30 Hz UI 요구를 약 33.3 ms의 측정 기준으로 구체화하고, 실제 RUBIK Pi 연구 환경에서 3,000회 이상 반복 측정해 Qt 애플리케이션 내부의 렌더링 지연을 정량 검증한 프로젝트다.
+Arduino가 UART로 보내는 RPM을 Qt 디지털 클러스터에 표시하고, 표시까지의 지연을 CSV로 기록하는 프로젝트다. 이 저장소의 **대표 검증**은 아래의 간헐 RPM 튐 사고에 대한 재현, 한계 확인, 임시조치(CRC) 검증이다.
+
+## Representative Verification: Intermittent RPM Spike (Fault Injection + CRC Containment)
+
+> 2025-10-21의 현상 설명은 작성자와 팀원의 증언이다. 아래 수치는 **오염 주입 시뮬레이션** 결과이며 실제 현장 로그가 아니다. 오염 발생률(32,400프레임에 1회)은 측정값이 아니라 설정값이고, 회로 원인은 추정이다.
+
+**상황.** 2025-10-21, 팀원이 RPM이 순간 튀었다가 돌아오는 것을 관측했고 이후 1~2번 더 관측됐다. 작성자는 보지 못했고, 소프트웨어 디버깅으로도 원인을 못 찾았다. 당시 시스템은 줄마다 "정수인가"만 확인했고, 버려진 줄이나 덮어쓰인 샘플은 로그에 남지 않았다.
+
+**검증 흐름.**
+
+1. 오염(비트 반전, 글자 삭제, 글자 삽입)을 주입해 현상을 재현한다.
+2. 먼저 시도한 검증의 한계를 확인한다. 형식 검사는 오염을 그대로 수용하고, 변화 폭 제한은 폭을 좁히면 정상 값을 버리고 넓히면 오염이 통과한다.
+3. 줄마다 CRC-8 검산값을 붙이는 임시조치를 적용하고, 틀린 값이 화면에 나가지 않고 거부 기록이 남는지 확인한다.
+
+**결과 (시뮬레이션).**
+
+| 파서 수준, 50시간 분량, 오염 247건 | 형식 검사만 | 변화 폭 200 | 변화 폭 100 | CRC-8 |
+|---|---|---|---|---|
+| 틀린 값 수용 | 106 | 19 | 18 | **0** |
+| 화면에 실제 표시 | 64 | 10 | 13 | **0** |
+| 정상 값 오폐기 | 0 | 0 | 14% | 0 |
+
+| 실제 앱, 가상 시리얼, 오염 104건 (100프레임에 1회로 가속) | 형식 검사만 | CRC-8 |
+|---|---|---|
+| 화면에 그려진 틀린 값 | **31** | **0** |
+| 거부 기록 | 0 | 103 |
+
+**한계.** CRC는 전송 구간 변조만 막고, 송신 전에 이미 틀린 값은 통과한다. 걸러진 순간에는 이전 값이 유지된다. 회로 근본 원인은 미확정이다. PTY는 실제 UART가 아니다.
+
+- 보고서: [validation/fault_injection/README.md](validation/fault_injection/README.md)
+- 상황 설명서(사실, 증언, 추정 구분): [validation/fault_injection/SITUATION.md](validation/fault_injection/SITUATION.md)
+- 설계 문서: [docs/superpowers/specs/2026-11-23-uart-spike-containment-design.md](docs/superpowers/specs/2026-11-23-uart-spike-containment-design.md)
+
+### How to Run (하드웨어 불필요)
+
+```bash
+docker build -f Dockerfile.verify -t rubik-verify .
+# 단위/통합 시험: tests/tst_framecheck, tests/tst_rpmparser, tests/tst_mainwindow
+# 파서 수준 시뮬레이션과 실제 앱 시험: validation/fault_injection/README.md 8절 참고
+```
+
 
 ## Project
 RUBIK Pi 3 보드에서 동작하는 C++/Qt5 디지털 클러스터다. Arduino가 시리얼(9600 baud)로 보내는 RPM 값을 화면에 표시하고, 그 과정의 지연시간을 CSV로 기록해 분석한다.
@@ -17,8 +57,8 @@ Sensor → Arduino → Serial → readSerialData() → acceptRpmSample()  [t_in]
 - 정승육(SeungYook Jung): 제1저자
 
 > **출처: original research poster result.** RUBIK Pi 3 연구 환경에서 측정한 값이다. 원본 측정 CSV는 이 저장소에 포함되어 있지 않다.
-> 아래의 Post-project Software Verification(PC/Docker)과는 별개이며, 그 결과와 섞거나 같은 조건으로 비교하지 않는다.
-> 측정한 코드는 연구 당시 코드인 tag [`research-baseline`](https://github.com/jsy202/RUBIK_PI_cluster/tree/research-baseline) (`4d4e3f8`)이다. 이후 main에 반영된 SW 수정(DEF-SW-01/02/04)은 이 결과에 포함되지 않으며, 수정된 코드는 RUBIK Pi에서 측정하지 않았다.
+> 위의 대표 검증(오염 주입, PC/Docker 시뮬레이션)과는 별개이며, 그 결과와 섞거나 같은 조건으로 비교하지 않는다.
+> 측정한 코드는 연구 당시 코드인 tag [`research-baseline`](https://github.com/jsy202/RUBIK_PI_cluster/tree/research-baseline) (`4d4e3f8`)이다. 이후 main에 반영된 SW 수정은 이 결과에 포함되지 않으며, 수정된 코드는 RUBIK Pi에서 측정하지 않았다.
 
 | 항목 | 값 |
 |---|---|
@@ -42,45 +82,6 @@ RPM 수신 이후 Qt 렌더링 완료까지 3,000회 이상 측정한 결과 평
 | | 실제 물리 디스플레이 표시 |
 
 코드 기준의 상세 정의: [validation/measurement_boundary.md](validation/measurement_boundary.md)
-
-## Post-project Software Verification 
-> 보조 섹션이다. 위 Historical Research Result를 다시 측정하거나 대체하지 않는다. **RUBIK Pi 3 하드웨어 없이**, 개발 PC + Docker(Qt offscreen)에서 수행했다. 연구 당시 코드는 tag [`research-baseline`](https://github.com/jsy202/RUBIK_PI_cluster/tree/research-baseline) (`4d4e3f8`)에 있다.
-
-기존 실제 하드웨어 연구 이후, host 환경에서 직접 작성한 C++ application logic(parser, 30 Hz 갱신, 속도 변환, CSV 계측)의 SW 검증 범위를 coverage, mutation, fuzz testing으로 확장했다.
-
-| 항목 (host, PC/Docker) | 결과 |
-|---|---|
-| Code coverage (C++ app logic, gcov) | line **8.1% → 97.1%**, branch **약 7% → 85.9%** |
-| 발견한 SW 결함 | **4건 — 3건 수정, 1건은 측정 한계로 유지** (아래) |
-| Parser fuzzing (libFuzzer + ASan/UBSan, 수정 후) — **대상은 RPM parser(`rpmparser.h`)뿐** | 600 s, 511,839 inputs, crash 0, sanitizer violation 0 |
-| Sanitizer (ASan + UBSan, 전체 QtTest) | 수정 전 UB 2건 검출 → 수정 후 0건 |
-
-| 결함 | 내용 | 상태 |
-|---|---|---|
-| DEF-SW-01 | RPM 상한이 없어서 속도의 int 변환이 UB가 됨 | 수정: 속도 공식과 int 타입이 허용하는 최대 RPM(911,420,367) 초과 입력은 거부 |
-| DEF-SW-02 | 애니메이션 시간 `delta * 2` int overflow | 수정: 정상 동작이 같은 overflow-free 계산 |
-| DEF-SW-04 | Qt 5.12에서 `"7\0abc"`가 7로 수용됨 | 수정: 한 줄 전체가 `[+\|-]숫자`인지 검증 |
-| DEF-SW-03 | 같은 값 샘플 뒤 관계없는 repaint 시점이 `t_frame`으로 기록될 수 있음 | **Known Measurement Limitation** — 재현은 됐지만 연구 당시 측정 의미와 관련되어 수정하지 않음. 원본 CSV가 없어 연구 결과에 대한 영향은 판단할 수 없음 |
-
-결함 수정(`rpmparser.h`, `mainwindow.cpp` 일부)은 연구 이후의 변경이다. RUBIK Pi에서 다시 실행하지 않았다.
-자세한 내용: [coverage](validation/software_verification/coverage_report.md) · [traceability](validation/software_verification/requirements_traceability.md) · [mutation](validation/software_verification/mutation_report.md) · [fuzz](validation/software_verification/fuzz_report.md) · [limitations](validation/software_verification/limitations.md)
-
-### How to Run Tests (하드웨어 불필요)
-```bash
-docker build -f Dockerfile.test -t rubik-cluster-test . && docker run --rm rubik-cluster-test   # app 빌드 + parser QtTest
-python3 -m pip install pytest && python3 -m pytest                                              # 분석/추적성 테스트
-
-# coverage / sanitizer / fuzz / mutation (Dockerfile.verify)
-docker build -f Dockerfile.verify -t rubik-verify .
-docker run --rm --security-opt seccomp=unconfined -v "$PWD":/src:ro -v "$PWD/.verify-out":/out \
-    rubik-verify bash /src/scripts/sw_verify.sh all     # 또는 tests | coverage | sanitize | fuzz 600 | mutate | negctl
-```
-
-## Additional Validation / Appendix
-개발 PC + Docker + Qt offscreen 환경에서 수행한 보조 분석이다. **RUBIK Pi 하드웨어 결과가 아니며, 위 Historical Result와 비교하지 않는다.**
-
-- PC/Docker validation scenarios: [validation/performance_report.md](validation/performance_report.md)
-- Raw results: [validation/perf_results/](validation/perf_results/)
 
 ---
 
