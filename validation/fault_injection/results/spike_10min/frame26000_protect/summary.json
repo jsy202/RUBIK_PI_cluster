@@ -1,0 +1,28 @@
+{
+ "summary": {
+  "stage": "protect",
+  "frames": 32400,
+  "period_ms": 20.0,
+  "fault_rate_per_frame": 0.01,
+  "seed": 20261123,
+  "exact_faults": null,
+  "flip": "26000:0:0",
+  "injected": 1,
+  "painted_rows": 19516,
+  "alignment_match_ratio": 1.0,
+  "wrong_values_painted": 0,
+  "reject_log_rows": 1,
+  "reject_reasons": {
+   "crc": 1
+  }
+ },
+ "wrong_painted": [],
+ "injections": [
+  {
+   "frame": 26000,
+   "type": "bitflip",
+   "original_hex": "313634332c35450a",
+   "sent_hex": "303634332c35450a"
+  }
+ ]
+}

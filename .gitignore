@@ -19,3 +19,4 @@ __pycache__/
 
 # raw per-run latency CSVs of the 32,400-frame windows (summary.json and reject logs are kept)
 validation/fault_injection/results/realrate/*/latency_metrics_*.csv
+validation/fault_injection/results/spike_10min/*/latency_metrics_*.csv

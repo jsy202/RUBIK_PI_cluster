@@ -63,10 +63,17 @@ def make_faults(frames: int, rate: float, seed: int, count=None):
     return faults
 
 
+def make_spike(frame: int, idx: int, bit: int):
+    """One fault at an explicit wire byte: flip `bit` of byte `idx` of the line sent at `frame`.
+    The same byte index is hit in plain and protected mode (protected lines only add a suffix)."""
+    return {frame: {"type": 0, "idx": idx, "bit": bit, "pos": 0.0, "byte": 0}}
+
+
 def corrupt(line: bytes, f) -> bytes:
     b = bytearray(line)
     if f["type"] == 0:
-        p = int(f["pos"] * len(b)); b[p] ^= 1 << f["bit"]
+        p = min(f["idx"], len(b) - 1) if "idx" in f else int(f["pos"] * len(b))
+        b[p] ^= 1 << f["bit"]
     elif f["type"] == 1:
         del b[int(f["pos"] * len(b))]
     else:
@@ -97,6 +104,8 @@ def main():
     ap.add_argument("--frames", type=int, default=10000)
     ap.add_argument("--rate", type=float, default=0.01)
     ap.add_argument("--faults", type=int, default=None, help="inject exactly this many faults (overrides --rate)")
+    ap.add_argument("--flip", default=None, metavar="FRAME:INDEX:BIT",
+                    help="a single bit flip at one explicit wire byte (overrides --faults and --rate)")
     ap.add_argument("--seed", type=int, default=20261123)
     ap.add_argument("--period-ms", type=float, default=20.0)
     a = ap.parse_args()
@@ -104,7 +113,11 @@ def main():
     os.makedirs(a.out, exist_ok=True)
 
     truth = make_truth(a.frames, a.seed)
-    faults = make_faults(a.frames, a.rate, a.seed, a.faults)
+    if a.flip:
+        fr, ix, bt = (int(x) for x in a.flip.split(":"))
+        faults = make_spike(fr, ix, bt)
+    else:
+        faults = make_faults(a.frames, a.rate, a.seed, a.faults)
 
     master, slave = pty.openpty()
     tty.setraw(slave)
@@ -161,7 +174,7 @@ def main():
         reasons[r["reason"]] = reasons.get(r["reason"], 0) + 1
     summary = {
         "stage": a.stage, "frames": a.frames, "period_ms": a.period_ms, "fault_rate_per_frame": a.rate,
-        "seed": a.seed, "exact_faults": a.faults, "injected": len(injections),
+        "seed": a.seed, "exact_faults": a.faults, "flip": a.flip, "injected": len(injections),
         "painted_rows": len(rows), "alignment_match_ratio": round(match, 3),
         "wrong_values_painted": len(wrong), "reject_log_rows": len(rejects), "reject_reasons": reasons,
     }
